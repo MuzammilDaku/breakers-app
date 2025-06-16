@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
+import AppProvider from '@/context/AppContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function RootLayout() {
@@ -17,12 +18,25 @@ export default function RootLayout() {
     return null;
   }
 
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
+      <AppProvider>
+        <Stack>
+          <Stack.Screen name='auth/login' options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="create-table" options={{ presentation:'modal',title:"Create Table"}} />
+
+          <Stack.Screen name="+not-found" />
+          <Stack.Screen
+            name="modal"
+            options={{
+              presentation: 'modal',
+              title: "View & Print Bill"
+            }}
+          />
+        </Stack>
+      </AppProvider>
       <StatusBar style="auto" />
     </ThemeProvider>
   );
