@@ -10,7 +10,7 @@ export default function TabLayout() {
   const { user } = context;
   useEffect(() => {
     if(!user) {
-      router.push("/auth/login")
+      router.navigate("/auth/login")
     }
   }, []);
   return (

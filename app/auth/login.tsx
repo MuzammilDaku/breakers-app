@@ -27,7 +27,7 @@ export default function LoginScreen() {
 
       if (!response.error) {
         setUser(response)
-        return router.push("/(tabs)");
+        return router.navigate("/(tabs)");
       }
       return alert(response.error || "Login failed. Please try again.");
     } catch (error) {
@@ -47,7 +47,7 @@ export default function LoginScreen() {
   useEffect(()=>{
     
     if(user){
-      router.push("/(tabs)")
+      router.navigate("/(tabs)")
     }
   },[router])
   return (

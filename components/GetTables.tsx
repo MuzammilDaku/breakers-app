@@ -36,20 +36,21 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
 
     const handleCheckOut = async () => {
         // setRunning(false)        
-        router.push({
-            pathname: '/modal', params: {
+        router.navigate({
+            pathname: '/modal',
+            params: {
                 table_name: tableName,
                 rate,
                 total_bill: counter * Number(rate),
                 total_frame: counter,
                 table_id: id
             }
-        })
+        });
     }
 
     async function getHistory () {
         const res = await GetHistory();
-        console.log(res)
+        // console.log(res)
     }
 
     useEffect(()=>{
@@ -134,7 +135,7 @@ const TableCreate = () => {
     return (
         <TouchableOpacity
             onPress={() => {
-                router.push("/create-table")
+                router.navigate("/create-table")
             }}
             style={styles.button}
         >
