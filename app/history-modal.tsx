@@ -1,43 +1,39 @@
+import { History } from "@/context/AppContext";
 import React from "react";
-import { Dimensions, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const historyData = [
-    { id: 1, date: "2024-06-01", player: "John Doe", score: 120, result: "Win" },
-    { id: 2, date: "2024-06-02", player: "Jane Smith", score: 98, result: "Lose" },
-    { id: 3, date: "2024-06-03", player: "Alex Lee", score: 110, result: "Win" },
-    { id: 4, date: "2024-06-04", player: "Sam Brown", score: 105, result: "Lose" },
-];
-
-export default function HistoryModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+export default function HistoryModal({ visible, onClose, history }: { visible: boolean; onClose: () => void, history: History[] | null }) {
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.overlay}>
                 <View style={styles.modal}>
-                    <Text style={styles.title}>Match History</Text>
-                    <View style={styles.tableHeader}>
-                        <Text style={[styles.cell, styles.header]}>Date</Text>
-                        <Text style={[styles.cell, styles.header]}>Player</Text>
-                        <Text style={[styles.cell, styles.header]}>Score</Text>
-                        <Text style={[styles.cell, styles.header]}>Result</Text>
-                    </View>
-                    <FlatList
-                        data={historyData}
-                        keyExtractor={item => item.id.toString()}
-                        renderItem={({ item, index }) => (
-                            <View style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}>
-                                <Text style={styles.cell}>{item.date}</Text>
-                                <Text style={styles.cell}>{item.player}</Text>
-                                <Text style={styles.cell}>{item.score}</Text>
-                                <Text style={[
-                                    styles.cell,
-                                    item.result === "Win" ? styles.win : styles.lose,
-                                    { fontWeight: "bold" }
-                                ]}>
-                                    {item.result}
-                                </Text>
+                    <Text style={styles.title}>Bill History</Text>
+                    <ScrollView horizontal style={{ marginBottom: 10 }}>
+                        <View>
+                            <View style={styles.tableHeader}>
+                                <Text style={[styles.cell, styles.header]}>Date</Text>
+                                <Text style={[styles.cell, styles.header]}>Customer Name</Text>
+                                <Text style={[styles.cell, styles.header]}>Customer Name</Text>
+                                <Text style={[styles.cell, styles.header]}>Customer Phone</Text>
+                                <Text style={[styles.cell, styles.header]}>Total Frame</Text>
+                                <Text style={[styles.cell, styles.header]}>Total Bill</Text>
+                                <Text style={[styles.cell, styles.header]}>Received Amount</Text>
                             </View>
-                        )}
-                    />
+                            <ScrollView style={{ maxHeight: 350 }}>
+                                {history?.map((item, index) => (
+                                    <View key={item._id} style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}>
+                                        <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.date?.slice(0,10)}</Text>
+                                        <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.customer_name}</Text>
+                                        <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.customer_name}</Text>
+                                        <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.customer_phone}</Text>
+                                        <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.total_frame}</Text>
+                                        <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.total_bill}</Text>
+                                        <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.received_amount}</Text>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    </ScrollView>
                     <TouchableOpacity style={styles.button} onPress={onClose}>
                         <Text style={styles.buttonText}>Close</Text>
                     </TouchableOpacity>
@@ -94,16 +90,10 @@ const styles = StyleSheet.create({
         backgroundColor: "#f9fafb",
     },
     cell: {
-        flex: 1,
+        minWidth: 120,
         textAlign: "left",
         paddingHorizontal: 4,
         fontSize: 15,
-    },
-    win: {
-        color: "#16a34a",
-    },
-    lose: {
-        color: "#dc2626",
     },
     button: {
         marginTop: 20,

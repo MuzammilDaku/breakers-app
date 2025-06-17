@@ -2,8 +2,7 @@ import { AppContext } from '@/context/AppContext';
 import { AddCheckIn } from '@/services/table';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useContext, useState } from 'react';
-import { PermissionsAndroid, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
-
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 export default function Modal() {
   const params = useLocalSearchParams();
   const { table_name, rate, total_bill, total_frame, table_id } = params
@@ -15,31 +14,6 @@ export default function Modal() {
   const [receivedAmount, setReceivedAmount] = useState("")
 
   const [loader,setLoader] = useState(false)
-
-const ensureBluetoothPermissions = async () => {
-  if (Platform.OS !== 'android') return true;
-
-  const grantedScan = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN);
-  const grantedConnect = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT);
-  const grantedLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-
-  if (grantedScan && grantedConnect && grantedLocation) {
-    return true; // ✅ Already granted
-  }
-
-  // 🟡 Ask only if not already granted
-  const granted = await PermissionsAndroid.requestMultiple([
-    PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-    PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-  ]);
-
-  return (
-    granted['android.permission.BLUETOOTH_SCAN'] === PermissionsAndroid.RESULTS.GRANTED &&
-    granted['android.permission.BLUETOOTH_CONNECT'] === PermissionsAndroid.RESULTS.GRANTED &&
-    granted['android.permission.ACCESS_FINE_LOCATION'] === PermissionsAndroid.RESULTS.GRANTED
-  );
-};
 
 
   const handleAddCheckIn = async () => {
@@ -62,23 +36,6 @@ const ensureBluetoothPermissions = async () => {
 
     if (!response.error) {
       setResetTableId(table_id as string);
-      // Print the bill after saving to db
-      // You can use expo-print for printing in React Native Expo
-      import('expo-print').then(({ printAsync }) => {
-      printAsync({
-        html: `
-        <h1>Snooker Club Bill</h1>
-        <p><strong>Table Name:</strong> ${table_name}</p>
-        <p><strong>Table Rate:</strong> ${rate}</p>
-        <p><strong>Total Frames:</strong> ${total_frame}</p>
-        <p><strong>Grand Total:</strong> ${total_bill}</p>
-        <p><strong>Customer Name:</strong> ${customerName}</p>
-        <p><strong>Customer Phone:</strong> ${customerPhone}</p>
-        <p><strong>Received Amount:</strong> ${receivedAmount}</p>
-        <p><strong>Status:</strong> ${Number(receivedAmount) == Number(total_bill) ? "Paid" : "Unpaid"}</p>
-        `,
-      });
-      });
     }
     router.back()
     setLoader(false)

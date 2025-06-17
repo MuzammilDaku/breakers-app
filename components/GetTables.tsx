@@ -1,3 +1,4 @@
+import HistoryModal from "@/app/history-modal";
 import { AppContext } from "@/context/AppContext";
 import { GetHistory, GetTables } from "@/services/table";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
@@ -19,7 +20,7 @@ type StopwatchProps = {
 
 const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
     const context = useContext(AppContext);
-    const { user, resetTableId, setResetTableId } = context;
+    const { user, resetTableId, setResetTableId, setHistory, history } = context;
     const [running, setRunning] = useState(false);
     const [payloadCheckIn, setPayloadCheckIn] = useState({
         total_frame: 0,
@@ -48,14 +49,14 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
         });
     }
 
-    async function getHistory () {
+    async function getHistory() {
         const res = await GetHistory();
-        // console.log(res)
+        setHistory(res);
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         getHistory()
-    },[resetTableId])
+    }, [resetTableId])
 
     useEffect(() => {
         if (resetTableId == id) {
@@ -65,18 +66,28 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
         }
     }, [resetTableId])
 
+    const [showModal,setShowModal] = useState(false)
+    const onCloseModal = () => {
+        setShowModal(false)
+    }
     return (
         <View style={styles.stopwatchContainer}>
             {/* <Text style={styles.timeText}>{formatTime(seconds)}</Text> */}
             <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                <HistoryModal visible={showModal} onClose={onCloseModal} history={Array.isArray(history) ? history.filter((e: any) => e.table_id === id) : []}/>
+                {Array.isArray(history) && history.some((e: any) => e.table_id === id) && (
+                    <TouchableOpacity
+                        onPress={() => {
+                            setShowModal(true)
+                        }}
+                        style={styles.historyButton}
+                    >
+                        <Text style={styles.buttonText}><FontAwesome name="history" /> View History</Text>
+                    </TouchableOpacity>
+                )}
+
                 {running && (
                     <>
-                        <TouchableOpacity
-                            onPress={() => setRunning(!running)}
-                            style={styles.historyButton}
-                        >
-                            <Text style={styles.buttonText}><FontAwesome name="history" /> View History</Text>
-                        </TouchableOpacity>
                         <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 4 }}>
                             <Text style={styles.timeText1} onPress={() => {
                                 if (counter > 1) {
@@ -93,7 +104,6 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
                             <Text style={styles.timeText}>
                                 Rs {counter * Number(rate)}
                             </Text>
-
                         </View>
                     </>
                 )}
@@ -107,7 +117,6 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
                         <Text style={styles.buttonText}><Ionicons name="play" /> Play Game</Text>
                     </TouchableOpacity>
                 )}
-
 
                 {running && <TouchableOpacity
                     onPress={handleCheckOut}
