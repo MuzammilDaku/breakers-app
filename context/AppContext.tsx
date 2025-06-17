@@ -5,6 +5,8 @@ export interface User {
     phone: string;
     role?: 'owner' | 'user';
     _id: string;
+    status:string;
+    date:Date;
 }
 
 export interface Table {
@@ -29,7 +31,7 @@ export interface History {
 
 export interface AppContextType {
     user: User | null;
-    setUser: (user: User) => void;
+    setUser: (user: User | null) => void;
     tables: Table[] | null;
     setTables: Dispatch<React.SetStateAction<Table[] | null>>;
     resetTableId: string;
