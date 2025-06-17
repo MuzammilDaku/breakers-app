@@ -2,7 +2,7 @@ import { AppContext } from '@/context/AppContext';
 import { AddCheckIn } from '@/services/table';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useContext, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { PermissionsAndroid, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function Modal() {
   const params = useLocalSearchParams();
@@ -15,6 +15,33 @@ export default function Modal() {
   const [receivedAmount, setReceivedAmount] = useState("")
 
   const [loader,setLoader] = useState(false)
+
+const ensureBluetoothPermissions = async () => {
+  if (Platform.OS !== 'android') return true;
+
+  const grantedScan = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN);
+  const grantedConnect = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT);
+  const grantedLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+
+  if (grantedScan && grantedConnect && grantedLocation) {
+    return true; // ✅ Already granted
+  }
+
+  // 🟡 Ask only if not already granted
+  const granted = await PermissionsAndroid.requestMultiple([
+    PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+    PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  ]);
+
+  return (
+    granted['android.permission.BLUETOOTH_SCAN'] === PermissionsAndroid.RESULTS.GRANTED &&
+    granted['android.permission.BLUETOOTH_CONNECT'] === PermissionsAndroid.RESULTS.GRANTED &&
+    granted['android.permission.ACCESS_FINE_LOCATION'] === PermissionsAndroid.RESULTS.GRANTED
+  );
+};
+
+
   const handleAddCheckIn = async () => {
     setLoader(true)
     if (!customerName || !customerPhone || !receivedAmount) {
@@ -28,12 +55,30 @@ export default function Modal() {
       received_amount: receivedAmount,
       total_bill,
       status: Number(receivedAmount) == Number(total_bill) ? "paid" : "unpaid",
-      created_by:user?._id
-      
-    }
+      created_by: user?._id
+    };
+
     const response = await AddCheckIn(payload);
-    if(!response.error) {
-      setResetTableId(table_id as string)
+
+    if (!response.error) {
+      setResetTableId(table_id as string);
+      // Print the bill after saving to db
+      // You can use expo-print for printing in React Native Expo
+      import('expo-print').then(({ printAsync }) => {
+      printAsync({
+        html: `
+        <h1>Snooker Club Bill</h1>
+        <p><strong>Table Name:</strong> ${table_name}</p>
+        <p><strong>Table Rate:</strong> ${rate}</p>
+        <p><strong>Total Frames:</strong> ${total_frame}</p>
+        <p><strong>Grand Total:</strong> ${total_bill}</p>
+        <p><strong>Customer Name:</strong> ${customerName}</p>
+        <p><strong>Customer Phone:</strong> ${customerPhone}</p>
+        <p><strong>Received Amount:</strong> ${receivedAmount}</p>
+        <p><strong>Status:</strong> ${Number(receivedAmount) == Number(total_bill) ? "Paid" : "Unpaid"}</p>
+        `,
+      });
+      });
     }
     router.back()
     setLoader(false)
@@ -59,28 +104,28 @@ export default function Modal() {
           <Text style={paramStyles.value}>{total_bill}</Text>
         </View>
         <View style={paramStyles.row}>
-          <Text style={paramStyles.key}>Enter Customer Name *</Text>
+          <Text style={paramStyles.key}>Customer Name *</Text>
           <TextInput
-            style={[paramStyles.value, { borderWidth: 1, borderColor: '#ccc', borderRadius: 5, paddingHorizontal: 8, minWidth: 220, paddingVertical: 10 }]}
-            placeholder="Enter Customer Name"
+            style={[paramStyles.value, { borderWidth: 1, borderColor: '#ccc', borderRadius: 5, paddingHorizontal: 8,  paddingVertical: 10 ,width:"50%"}]}
+            placeholder="Customer Name"
             value={customerName}
             onChangeText={(value) => setCustomerName(value)}
           />
         </View>
         <View style={paramStyles.row}>
-          <Text style={paramStyles.key}>Enter Customer Phone *</Text>
+          <Text style={paramStyles.key}>Customer Phone *</Text>
           <TextInput
-            style={[paramStyles.value, { borderWidth: 1, borderColor: '#ccc', borderRadius: 5, paddingHorizontal: 8, minWidth: 220, paddingVertical: 10 }]}
-            placeholder="Enter Customer Phone"
+            style={[paramStyles.value, { borderWidth: 1, borderColor: '#ccc', borderRadius: 5, paddingHorizontal: 8, paddingVertical: 10,width:"50%" }]}
+            placeholder="Customer Phone"
             value={customerPhone}
             onChangeText={(value) => setCustomerPhone(value)}
           />
         </View>
         <View style={paramStyles.row}>
-          <Text style={paramStyles.key}>Enter Received Amount *</Text>
+          <Text style={paramStyles.key}>Received Amount *</Text>
           <TextInput
-            style={[paramStyles.value, { borderWidth: 1, borderColor: '#ccc', borderRadius: 5, paddingHorizontal: 8, minWidth: 220, paddingVertical: 10 }]}
-            placeholder="Enter Received Amount"
+            style={[paramStyles.value, { borderWidth: 1, borderColor: '#ccc', borderRadius: 5, paddingHorizontal: 8, paddingVertical: 10,width:"50%" }]}
+            placeholder="Received Amount"
             value={receivedAmount}
             onChangeText={(value) => setReceivedAmount(value)}
           />
