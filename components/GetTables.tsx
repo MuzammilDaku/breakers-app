@@ -1,9 +1,9 @@
 import HistoryModal from "@/app/history-modal";
-import { AppContext } from "@/context/AppContext";
+import { useAppStore } from "@/context/appStore";
 import { GetHistory, GetTables } from "@/services/table";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 type TableProps = {
     name: string;
@@ -19,8 +19,7 @@ type StopwatchProps = {
 };
 
 const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
-    const context = useContext(AppContext);
-    const { user, resetTableId, setResetTableId, setHistory, history } = context;
+    const { user, resetTableId, setResetTableId, setHistory, history } = useAppStore();
     const [running, setRunning] = useState(false);
     const [payloadCheckIn, setPayloadCheckIn] = useState({
         total_frame: 0,
@@ -165,8 +164,7 @@ const TableCardCreate: React.FC = () => (
 );
 
 const GetTablesComp: React.FC = () => {
-    const context = useContext(AppContext);
-    const { tables, setTables } = context;
+    const { tables, setTables } = useAppStore();
     useEffect(() => {
         async function fetchTables() {
             try {

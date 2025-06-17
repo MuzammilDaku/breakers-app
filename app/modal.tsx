@@ -1,14 +1,13 @@
-import { AppContext } from '@/context/AppContext';
+import { useAppStore } from '@/context/appStore';
 import { AddCheckIn } from '@/services/table';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 export default function Modal() {
   const params = useLocalSearchParams();
   const { table_name, rate, total_bill, total_frame, table_id } = params
 
-  const context = useContext(AppContext);
-  const {setResetTableId,user} = context;
+  const {setResetTableId,user} = useAppStore();
   const [customerName, setCustomerName] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
   const [receivedAmount, setReceivedAmount] = useState("")

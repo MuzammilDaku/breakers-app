@@ -1,13 +1,12 @@
 import { Tabs, useRouter } from 'expo-router';
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { AppContext } from '@/context/AppContext';
+import { useAppStore } from '@/context/appStore';
 
 export default function TabLayout() {
   const router = useRouter();
-  const context = useContext(AppContext);
-  const { user, setUser } = context;
+  const { user, setUser } = useAppStore();
   useEffect(() => {
     if (!user) {
       router.navigate("/auth/login")

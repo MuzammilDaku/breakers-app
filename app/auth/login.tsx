@@ -1,14 +1,13 @@
-import { AppContext } from "@/context/AppContext";
+import { useAppStore } from "@/context/appStore";
 import { LoginUser } from "@/services/auth";
 import { Ionicons } from "@expo/vector-icons";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { router } from "expo-router";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function LoginScreen() {
-  const context = useContext(AppContext);
-  const { setUser ,user} = context;
+  const { setUser ,user} = useAppStore();
   const [credentials, setCredentials] = useState<{ phone: string, password: string }>({
     phone: "03121212121",
     password: "Test12@"
@@ -23,7 +22,7 @@ export default function LoginScreen() {
       // Here you would typically call your login API
       // For example:
       const response = await LoginUser(credentials);
-      console.log(response);
+      // console.log(response);
 
       if (!response.error) {
         setUser(response)

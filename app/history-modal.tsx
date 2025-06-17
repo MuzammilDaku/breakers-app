@@ -1,4 +1,4 @@
-import { History } from "@/context/AppContext";
+import { History } from "@/context/appStore";
 import React from "react";
 import { Dimensions, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
