@@ -24,15 +24,15 @@ export interface Table {
 }
 
 export interface History {
-  created_by: string;
+  created_by: any;
   total_frame: number;
-  status: 'paid' | 'unpaid';
+  status: string;
   total_bill: number;
   table_id: string;
   customer_name: string;
   customer_phone: string;
   received_amount: number;
-  date?: any;
+  date: any;
   _id: string;
 }
 
@@ -43,11 +43,13 @@ interface AppStore {
   tables: Table[];
   setTables: (tables: Table[] ) => void;
   addTable: (table: Table) => void;
+  addHistory: (history: History) => void;
+
   resetTableId: string;
   setResetTableId: (id: string) => void;
 
-  history: History[] | null;
-  setHistory: (history: History[] | null) => void;
+  history: History[];
+  setHistory: (history: History[]) => void;
 }
 
 export const useAppStore = create<AppStore>()(
@@ -66,11 +68,14 @@ export const useAppStore = create<AppStore>()(
       setHistory: (history) => set({ history }),
 
       addTable: (table) => set({ tables: [...(get().tables || []), table] }),
+      addHistory: (history) => set({ history: [...(get().history || []), history] }),
+      
     }),
     {
       name: 'app-store', // key in AsyncStorage
       storage: {
         getItem: async (name) => {
+          // zustand persist expects a StorageValue or null
           const value = await AsyncStorage.getItem(name);
           return value ? JSON.parse(value) : null;
         },

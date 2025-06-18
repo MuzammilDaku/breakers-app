@@ -1,7 +1,7 @@
 import { useAppStore } from '@/context/appStore';
 import { useOfflineStore } from '@/context/offlineStore';
-import { isInternetConnected } from '@/services/hooks/isInternetConnected';
 import { AddTable } from '@/services/table';
+import { isInternetConnected } from '@/services/utilities/isInternetConnected';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -39,7 +39,6 @@ const AddTableComp: React.FC = () => {
             }
             setIsLoading(true)
             const isConnected = await isInternetConnected();
-            console.log("Is Connected",isConnected  )
             const payload = {
                 _id: uuid.v4().toString(),
                 name: tableName,

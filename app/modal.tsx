@@ -1,42 +1,63 @@
 import { useAppStore } from '@/context/appStore';
+import { useOfflineStore } from '@/context/offlineStore';
+import { baseUrl } from '@/services/base';
 import { AddCheckIn } from '@/services/table';
+import { getRandomId } from '@/services/utilities/getRandomId';
+import { isInternetConnected } from '@/services/utilities/isInternetConnected';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
 export default function Modal() {
   const params = useLocalSearchParams();
   const { table_name, rate, total_bill, total_frame, table_id } = params
 
-  const {setResetTableId,user} = useAppStore();
+  const {setResetTableId,user,addHistory} = useAppStore();
   const [customerName, setCustomerName] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
   const [receivedAmount, setReceivedAmount] = useState("")
 
-  const [loader,setLoader] = useState(false)
-
+  const [loader,setLoader] = useState(false);
+  const {addToQueue} = useOfflineStore()
 
   const handleAddCheckIn = async () => {
-    setLoader(true)
     if (!customerName || !customerPhone || !receivedAmount) {
       return alert("Please fill in all fields !")
     }
+    setLoader(true)
+
     const payload = {
-      table_id,
-      total_frame,
+      table_id:table_id as string,
+      total_frame:Number(total_frame),
       customer_name: customerName,
       customer_phone: customerPhone,  
-      received_amount: receivedAmount,
-      total_bill,
+      received_amount: Number(receivedAmount),
+      total_bill:Number(total_bill),
       status: Number(receivedAmount) == Number(total_bill) ? "paid" : "unpaid",
-      created_by: user?._id
+      created_by: user?._id,
+      _id:getRandomId(),
+      date:new Date().toISOString()
     };
 
-    const response = await AddCheckIn(payload);
+    const isConnected = await isInternetConnected();
 
-    if (!response.error) {
-      setResetTableId(table_id as string);
+    if(isConnected) {
+      const response = await AddCheckIn(payload);
+      if (!response.error) {
+        router.back()
+      }
     }
-    router.back()
+    else {
+       addToQueue({
+        method:"POST",
+        url:baseUrl+'/check-in',
+        body:payload,
+        id:getRandomId()
+       })
+        router.back()
+
+    }
+    addHistory(payload)
+    setResetTableId(table_id as string);
     setLoader(false)
   }
   return (
@@ -103,7 +124,7 @@ export default function Modal() {
             // onPress handler for save and print bill
             onPress={handleAddCheckIn}
           >
-            Save & Print Bill
+            {loader ? <ActivityIndicator /> : 'Save & Print Bill'}
           </Text>
         </View>
         <View style={{ flex: 1, marginLeft: 8 }}>

@@ -22,7 +22,7 @@ export default function HistoryModal({ visible, onClose, history }: { visible: b
                             <ScrollView style={{ maxHeight: 350 }}>
                                 {history?.map((item, index) => (
                                     <View key={item._id} style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}>
-                                        <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.date?.slice(0,10)}</Text>
+                                        <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.date && item.date.slice(0,10)}</Text>
                                         <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.customer_name}</Text>
                                         <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.customer_name}</Text>
                                         <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.customer_phone}</Text>

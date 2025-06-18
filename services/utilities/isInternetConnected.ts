@@ -15,6 +15,6 @@ export const isInternetConnected = async (): Promise<boolean> => {
   } catch (error) {
     return false;
   } finally {
-    clearTimeout(timeout); // cleanup timer
+    clearTimeout(timeout); 
   }
 };

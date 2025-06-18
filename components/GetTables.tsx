@@ -30,7 +30,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
     })
 
     const [counter, setCounter] = useState(0);
-    const {queue} = useOfflineStore()
+    const { queue } = useOfflineStore()
 
     useEffect(() => {
         setPayloadCheckIn({ ...payloadCheckIn, total_frame: counter, total_bill: counter * Number(rate), table_id: id, created_by: user?._id })
@@ -57,8 +57,10 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
     }
 
     useEffect(() => {
-        getHistory()
-    }, [resetTableId])
+          if (queue.length === 0) {
+            getHistory();
+        }
+    }, [])
 
     useEffect(() => {
         if (resetTableId == id) {
@@ -68,7 +70,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
         }
     }, [resetTableId])
 
-    const [showModal,setShowModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     const onCloseModal = () => {
         setShowModal(false)
@@ -77,7 +79,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
         <View style={styles.stopwatchContainer}>
             {/* <Text style={styles.timeText}>{formatTime(seconds)}</Text> */}
             <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                <HistoryModal visible={showModal} onClose={onCloseModal} history={Array.isArray(history) ? history.filter((e: any) => e.table_id === id) : []}/>
+                <HistoryModal visible={showModal} onClose={onCloseModal} history={Array.isArray(history) ? history.filter((e: any) => e.table_id === id) : []} />
                 {Array.isArray(history) && history.some((e: any) => e.table_id === id) && (
                     <TouchableOpacity
                         onPress={() => {
@@ -169,9 +171,12 @@ const TableCardCreate: React.FC = () => (
 
 const GetTablesComp: React.FC = () => {
     const { tables, setTables } = useAppStore();
+    const { queue } = useOfflineStore()
     useEffect(() => {
+
         async function fetchTables() {
             try {
+
                 const response = await GetTables();
                 if (response && Array.isArray(response)) {
                     setTables(response);
@@ -180,7 +185,9 @@ const GetTablesComp: React.FC = () => {
                 console.error("Error fetching tables:", error);
             }
         }
-        fetchTables();
+        if (queue.length === 0) {
+            fetchTables();
+        }
     }, [])
     return (
         <ScrollView contentContainerStyle={styles.container}>

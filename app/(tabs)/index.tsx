@@ -1,14 +1,14 @@
 import GetTablesComp from "@/components/GetTables";
 import { useAppStore } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
-import { isInternetConnected } from "@/services/hooks/isInternetConnected";
+import { isInternetConnected } from "@/services/utilities/isInternetConnected";
 import { router } from "expo-router";
 import { useEffect, useRef } from "react";
 
 
 export default function HomeScreen() {
   const { user } = useAppStore();
-  const { queue, syncQueue,syncing } = useOfflineStore()
+  const { syncQueue,syncing } = useOfflineStore()
   useEffect(() => {
     if (!user) {
       router.navigate("/auth/login")
