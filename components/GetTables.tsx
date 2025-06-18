@@ -1,5 +1,6 @@
 import HistoryModal from "@/app/history-modal";
-import { useAppStore } from "@/context/appStore";
+import { Table, useAppStore } from "@/context/appStore";
+import { useOfflineStore } from "@/context/offlineStore";
 import { GetHistory, GetTables } from "@/services/table";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -29,9 +30,11 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
     })
 
     const [counter, setCounter] = useState(0);
+    const {queue} = useOfflineStore()
 
     useEffect(() => {
         setPayloadCheckIn({ ...payloadCheckIn, total_frame: counter, total_bill: counter * Number(rate), table_id: id, created_by: user?._id })
+        console.log(queue)
     }, [counter])
 
     const handleCheckOut = async () => {
@@ -65,7 +68,8 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
         }
     }, [resetTableId])
 
-    const [showModal,setShowModal] = useState(false)
+    const [showModal,setShowModal] = useState(false);
+
     const onCloseModal = () => {
         setShowModal(false)
     }
@@ -128,13 +132,13 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
     );
 };
 
-const TableCard: React.FC<TableProps> = ({ name, minute_rate, _id }) => (
+const TableCard: React.FC<Table> = ({ name, minute_rate, _id }) => (
     <View style={styles.card}>
         <Image source={require("../assets/images/snooker.jpg")} style={styles.image} resizeMode="cover" />
         <View style={styles.cardContent}>
             <Text style={styles.tableName}>{name}</Text>
             <Text style={styles.rate}>(Rs{minute_rate}/min)</Text>
-            <Stopwatch rate={minute_rate} id={_id} tableName={name} />
+            <Stopwatch rate={String(minute_rate)} id={_id as string} tableName={name} />
         </View>
     </View>
 );

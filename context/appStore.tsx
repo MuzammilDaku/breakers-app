@@ -13,9 +13,14 @@ export interface User {
 
 export interface Table {
   name: string;
-  minute_rate: string;
+  minute_rate?: number;
   created_by: string;
-  _id: string;
+  six_red_rate: Number;
+  ten_red_rate: Number;
+  century_rate: Number;
+  one_red_rate: Number
+  _id?:string;
+  date?:Date
 }
 
 export interface History {
@@ -35,8 +40,8 @@ interface AppStore {
   user: User | null;
   setUser: (user: User | null) => void;
 
-  tables: Table[] | null;
-  setTables: (tables: Table[] | null) => void;
+  tables: Table[];
+  setTables: (tables: Table[] ) => void;
   addTable: (table: Table) => void;
   resetTableId: string;
   setResetTableId: (id: string) => void;

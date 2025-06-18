@@ -1,31 +1,83 @@
 import { useAppStore } from '@/context/appStore';
+import { useOfflineStore } from '@/context/offlineStore';
+import { isInternetConnected } from '@/services/hooks/isInternetConnected';
 import { AddTable } from '@/services/table';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import uuid from 'react-native-uuid';
+
+import { baseUrl } from '@/services/base';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const AddTableComp: React.FC = () => {
     const [tableName, setTableName] = useState('');
-    const [ratePerMinute, setRatePerMinute] = useState('');
-    const { user, addTable } = useAppStore();
+    const [ratePerMinute, setRatePerMinute] = useState<number>(0);
+    const [ratePerMinuteInput, setRatePerMinuteInput] = useState('');
 
+    const [centuryRateInput, setCenturyRateInput] = useState('');
+    const [centuryRate, setCenturyRate] = useState<number>(0)
+
+    const [tenRedRateInput, setTenRedRateInput] = useState('');
+    const [tenRedRate, setTenRedRate] = useState<number>(0)
+
+    const [oneRedRateInput, setOneRedRateInput] = useState('');
+    const [oneRedRate, setOneRedRate] = useState<number>(0)
+
+    const [sixRedRateInput, setSixRedRateInput] = useState('');
+    const [sixRedRate, setSixRedRate] = useState<number>(0)
+
+    const { user, addTable } = useAppStore();
+    const { addToQueue } = useOfflineStore()
+
+    const [isLoading,setIsLoading] = useState(false);
     const handleAddTable = async () => {
         try {
-            if (!tableName.trim() || !ratePerMinute.trim()) {
+            if (!tableName.trim() || !ratePerMinute || !oneRedRate || !centuryRate || !sixRedRate || !tenRedRate || !user) {
                 Alert.alert('Error', 'Please fill in all fields.');
                 return;
             }
-            // Add your submit logic here
-            const res = await AddTable({ name: tableName, minute_rate: ratePerMinute, created_by: user?._id })
-            if (res.error) {
-                return alert(res.error)
+            setIsLoading(true)
+            const isConnected = await isInternetConnected();
+            console.log("Is Connected",isConnected  )
+            const payload = {
+                _id: uuid.v4().toString(),
+                name: tableName,
+                minute_rate: Number(ratePerMinute),
+                created_by: user?._id,
+                date: new Date(),
+                one_red_rate: oneRedRate,
+                six_red_rate: sixRedRate,
+                ten_red_rate: tenRedRate,
+                century_rate: centuryRate
             }
-            addTable(res)
+            if (isConnected) {
+                const res = await AddTable(payload)
+                if (res.error) {
+                    return alert(res.error)
+                }
+                addTable(res)
+            }
+            else {
+                 addToQueue({
+                    url: `${baseUrl}/table`,
+                    id: uuid.v4().toString(),
+                    method: "POST",
+                    body: payload
+                })
+                addTable(payload)
+            }
+            setRatePerMinute(0);
+            setCenturyRate(0);
+            setOneRedRate(0)
+            setSixRedRate(0)
+            setTenRedRate(0)
+            
             Alert.alert('Success', `Table "${tableName}" added at ₹${ratePerMinute}/min`);
-
             setTableName('');
-            setRatePerMinute('');
+            
+            setRatePerMinute(0);
+            setIsLoading(false)
             router.back();
         } catch (error) {
             console.log(error)
@@ -55,14 +107,72 @@ const AddTableComp: React.FC = () => {
                     <TextInput
                         style={styles.input}
                         placeholder="Rate per Minute"
-                        value={ratePerMinute}
-                        onChangeText={setRatePerMinute}
+                        value={ratePerMinuteInput}
+                        onChangeText={text => {
+                            const numeric = text.replace(/[^0-9]/g, '');
+                            setRatePerMinuteInput(numeric)
+                            setRatePerMinute(numeric ? parseInt(numeric, 10) : 0);
+                        }} keyboardType="numeric"
+                    />
+                </View>
+                <View style={styles.inputContainer}>
+                    <Ionicons name="cash-outline" size={20} color="#636e72" style={styles.icon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Century Rate"
+                        value={centuryRateInput}
+                        onChangeText={text => {
+                            const numeric = text.replace(/[^0-9]/g, '');
+                            setCenturyRateInput(numeric)
+                            setCenturyRate(numeric ? parseInt(numeric, 10) : 0);
+                        }}
                         keyboardType="numeric"
                     />
                 </View>
-                <TouchableOpacity style={styles.button} onPress={handleAddTable}>
-                    <Ionicons name="save-outline" size={20} color="#fff" />
-                    <Text style={styles.buttonText}>Add Table</Text>
+                <View style={styles.inputContainer}>
+                    <Ionicons name="cash-outline" size={20} color="#636e72" style={styles.icon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="One Red Rate"
+                        value={oneRedRateInput}
+                        onChangeText={text => {
+                            const numeric = text.replace(/[^0-9]/g, '');
+                            setOneRedRateInput(numeric)
+                            setOneRedRate(numeric ? parseInt(numeric, 10) : 0);
+                        }} keyboardType="numeric"
+                    />
+                </View>
+                <View style={styles.inputContainer}>
+                    <Ionicons name="cash-outline" size={20} color="#636e72" style={styles.icon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Six Red Rate"
+                        value={sixRedRateInput}
+                        onChangeText={text => {
+                            const numeric = text.replace(/[^0-9]/g, '');
+                            setSixRedRateInput(numeric)
+                            setSixRedRate(numeric ? parseInt(numeric, 10) : 0);
+                        }}
+                        keyboardType="numeric"
+                    />
+                </View>
+                <View style={styles.inputContainer}>
+                    <Ionicons name="cash-outline" size={20} color="#636e72" style={styles.icon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Ten Red Rate"
+                        value={tenRedRateInput}
+                        onChangeText={text => {
+                            const numeric = text.replace(/[^0-9]/g, '');
+                            setTenRedRateInput(text)
+                            setTenRedRate(numeric ? parseInt(numeric, 10) : 0);
+                        }}
+                        keyboardType="numeric"
+                    />
+                </View>
+                <TouchableOpacity style={styles.button} onPress={handleAddTable} disabled={isLoading}>
+                    {!isLoading && <Ionicons name="save-outline" size={20} color="#fff" />}
+                    <Text style={styles.buttonText}>{isLoading ? <ActivityIndicator color={'#fefe'} size={'small'}/>:"Add Table"}</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>

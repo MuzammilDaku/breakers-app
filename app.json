@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "SnookerClub",
-    "slug": "SnookerClub",
+    "name": "Breakers",
+    "slug": "Breakers",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "snookerclub",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,8 +13,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/logo.png"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.muzammildaku.SnookerClub"
@@ -29,7 +28,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/splashscreen.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -42,7 +41,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "4cc5e1ee-b7b7-4f07-a230-21266bf3d51f"
+        "projectId": "d1d6c87a-2900-4b20-84ac-f4c6c431f6a6"
       }
     }
   }
