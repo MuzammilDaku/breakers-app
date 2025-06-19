@@ -14,23 +14,23 @@ const AddTableComp: React.FC = () => {
     const params = useLocalSearchParams()
     const tableStr = Array.isArray(params?.table) ? params.table[0] : params?.table;
     const table: Table = tableStr ? JSON.parse(tableStr) : null;
-    const [tableName, setTableName] = useState(table.name ? table.name : '');
-    const [ratePerMinute, setRatePerMinute] = useState<number>(table.minute_rate ? Number(table.minute_rate) : 0);
-    const [ratePerMinuteInput, setRatePerMinuteInput] = useState(table.minute_rate ? String(table.minute_rate) : '');
+    const [tableName, setTableName] = useState(table?.name ? table.name : '');
+    const [ratePerMinute, setRatePerMinute] = useState<number>(table?.minute_rate ? Number(table.minute_rate) : 0);
+    const [ratePerMinuteInput, setRatePerMinuteInput] = useState(table?.minute_rate ? String(table.minute_rate) : '');
 
-    const [centuryRateInput, setCenturyRateInput] = useState(table.century_rate ? String(table.century_rate) : '');
-    const [centuryRate, setCenturyRate] = useState<number>(table.century_rate ? Number(table.century_rate) : 0)
+    const [centuryRateInput, setCenturyRateInput] = useState(table?.century_rate ? String(table.century_rate) : '');
+    const [centuryRate, setCenturyRate] = useState<number>(table?.century_rate ? Number(table.century_rate) : 0)
 
-    const [tenRedRateInput, setTenRedRateInput] = useState(table.ten_red_rate ? String(table.ten_red_rate) : '');
-    const [tenRedRate, setTenRedRate] = useState<number>(table.ten_red_rate ? Number(table.ten_red_rate) : 0)
+    const [tenRedRateInput, setTenRedRateInput] = useState(table?.ten_red_rate ? String(table.ten_red_rate) : '');
+    const [tenRedRate, setTenRedRate] = useState<number>(table?.ten_red_rate ? Number(table.ten_red_rate) : 0)
 
-    const [oneRedRateInput, setOneRedRateInput] = useState(table.one_red_rate ? String(table.one_red_rate) : '');
-    const [oneRedRate, setOneRedRate] = useState<number>(table.one_red_rate ? Number(table.one_red_rate) : 0)
+    const [oneRedRateInput, setOneRedRateInput] = useState(table?.one_red_rate ? String(table.one_red_rate) : '');
+    const [oneRedRate, setOneRedRate] = useState<number>(table?.one_red_rate ? Number(table.one_red_rate) : 0)
 
-    const [sixRedRateInput, setSixRedRateInput] = useState(table.six_red_rate ? String(table.six_red_rate) : '');
-    const [sixRedRate, setSixRedRate] = useState<number>(table.six_red_rate ? Number(table.six_red_rate) : 0)
+    const [sixRedRateInput, setSixRedRateInput] = useState(table?.six_red_rate ? String(table.six_red_rate) : '');
+    const [sixRedRate, setSixRedRate] = useState<number>(table?.six_red_rate ? Number(table.six_red_rate) : 0)
 
-    const { user, addTable,editTable } = useAppStore();
+    const { user, addTable, editTable } = useAppStore();
     const { addToQueue } = useOfflineStore()
 
     const [isLoading, setIsLoading] = useState(false);
@@ -40,9 +40,11 @@ const AddTableComp: React.FC = () => {
                 Alert.alert('Error', 'Please fill in all fields.');
                 return;
             }
+            setIsLoading(true)
+
             const isConnected = await isInternetConnected();
 
-            if (table._id) {
+            if (table && table?._id) {
                 // console.log("edit")
                 setIsLoading(true)
                 const payload = {
@@ -85,7 +87,6 @@ const AddTableComp: React.FC = () => {
                 router.back();
             }
             else {
-                setIsLoading(true)
                 const payload = {
                     _id: getRandomId(),
                     name: tableName,
@@ -136,7 +137,7 @@ const AddTableComp: React.FC = () => {
                 <View style={styles.titleContainer}>
                     <Ionicons name="add-circle-outline" size={28} color="#2e86de" />
                     <Text style={styles.heading}>
-                        {table._id ? "Edit Table":"Add Snooker Table"}
+                        {table?._id ? "Edit Table" : "Add Snooker Table"}
                     </Text>
                 </View>
                 <View style={styles.inputContainer}>
@@ -219,7 +220,7 @@ const AddTableComp: React.FC = () => {
                 <TouchableOpacity style={styles.button} onPress={handleAddTable} disabled={isLoading}>
                     {!isLoading && <Ionicons name="save-outline" size={20} color="#fff" />}
                     <Text style={styles.buttonText}>{isLoading ? <ActivityIndicator color={'#fefe'} size={'small'} /> : (
-                        (table._id ? "Edit Table" : "Add Table")
+                        (table?._id ? "Edit Table" : "Add Table")
                     )}</Text>
                 </TouchableOpacity>
             </View>

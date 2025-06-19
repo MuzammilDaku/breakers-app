@@ -124,7 +124,7 @@ export default function Modal() {
             // onPress handler for save and print bill
             onPress={handleAddCheckIn}
           >
-            {loader ? <ActivityIndicator /> : 'Save & Print Bill'}
+            {loader ? <ActivityIndicator color={'#fefe'}/> : 'Save & Print Bill'}
           </Text>
         </View>
         <View style={{ flex: 1, marginLeft: 8 }}>
