@@ -1,83 +1,130 @@
-import { useAppStore } from '@/context/appStore';
+import { Table, useAppStore } from '@/context/appStore';
 import { useOfflineStore } from '@/context/offlineStore';
-import { AddTable } from '@/services/table';
+import { AddTable, updateTable } from '@/services/table';
 import { isInternetConnected } from '@/services/utilities/isInternetConnected';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import uuid from 'react-native-uuid';
 
 import { baseUrl } from '@/services/base';
+import { getRandomId } from '@/services/utilities/getRandomId';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const AddTableComp: React.FC = () => {
-    const [tableName, setTableName] = useState('');
-    const [ratePerMinute, setRatePerMinute] = useState<number>(0);
-    const [ratePerMinuteInput, setRatePerMinuteInput] = useState('');
+    const params = useLocalSearchParams()
+    const tableStr = Array.isArray(params?.table) ? params.table[0] : params?.table;
+    const table: Table = tableStr ? JSON.parse(tableStr) : null;
+    const [tableName, setTableName] = useState(table.name ? table.name : '');
+    const [ratePerMinute, setRatePerMinute] = useState<number>(table.minute_rate ? Number(table.minute_rate) : 0);
+    const [ratePerMinuteInput, setRatePerMinuteInput] = useState(table.minute_rate ? String(table.minute_rate) : '');
 
-    const [centuryRateInput, setCenturyRateInput] = useState('');
-    const [centuryRate, setCenturyRate] = useState<number>(0)
+    const [centuryRateInput, setCenturyRateInput] = useState(table.century_rate ? String(table.century_rate) : '');
+    const [centuryRate, setCenturyRate] = useState<number>(table.century_rate ? Number(table.century_rate) : 0)
 
-    const [tenRedRateInput, setTenRedRateInput] = useState('');
-    const [tenRedRate, setTenRedRate] = useState<number>(0)
+    const [tenRedRateInput, setTenRedRateInput] = useState(table.ten_red_rate ? String(table.ten_red_rate) : '');
+    const [tenRedRate, setTenRedRate] = useState<number>(table.ten_red_rate ? Number(table.ten_red_rate) : 0)
 
-    const [oneRedRateInput, setOneRedRateInput] = useState('');
-    const [oneRedRate, setOneRedRate] = useState<number>(0)
+    const [oneRedRateInput, setOneRedRateInput] = useState(table.one_red_rate ? String(table.one_red_rate) : '');
+    const [oneRedRate, setOneRedRate] = useState<number>(table.one_red_rate ? Number(table.one_red_rate) : 0)
 
-    const [sixRedRateInput, setSixRedRateInput] = useState('');
-    const [sixRedRate, setSixRedRate] = useState<number>(0)
+    const [sixRedRateInput, setSixRedRateInput] = useState(table.six_red_rate ? String(table.six_red_rate) : '');
+    const [sixRedRate, setSixRedRate] = useState<number>(table.six_red_rate ? Number(table.six_red_rate) : 0)
 
-    const { user, addTable } = useAppStore();
+    const { user, addTable,editTable } = useAppStore();
     const { addToQueue } = useOfflineStore()
 
-    const [isLoading,setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const handleAddTable = async () => {
         try {
             if (!tableName.trim() || !ratePerMinute || !oneRedRate || !centuryRate || !sixRedRate || !tenRedRate || !user) {
                 Alert.alert('Error', 'Please fill in all fields.');
                 return;
             }
-            setIsLoading(true)
             const isConnected = await isInternetConnected();
-            const payload = {
-                _id: uuid.v4().toString(),
-                name: tableName,
-                minute_rate: Number(ratePerMinute),
-                created_by: user?._id,
-                date: new Date(),
-                one_red_rate: oneRedRate,
-                six_red_rate: sixRedRate,
-                ten_red_rate: tenRedRate,
-                century_rate: centuryRate
-            }
-            if (isConnected) {
-                const res = await AddTable(payload)
-                if (res.error) {
-                    return alert(res.error)
+
+            if (table._id) {
+                // console.log("edit")
+                setIsLoading(true)
+                const payload = {
+                    _id: table._id,
+                    name: tableName,
+                    minute_rate: Number(ratePerMinute),
+                    created_by: user?._id,
+                    one_red_rate: oneRedRate,
+                    six_red_rate: sixRedRate,
+                    ten_red_rate: tenRedRate,
+                    century_rate: centuryRate
                 }
-                addTable(res)
+
+                if (isConnected) {
+                    const res = await updateTable(payload);
+                    if (res.error) {
+                        return Alert.alert('Error', res.error)
+                    }
+
+                    editTable(res)
+                }
+                else {
+                    addToQueue({
+                        url: `${baseUrl}/table`,
+                        id: getRandomId(),
+                        method: "PUT",
+                        body: payload
+                    })
+                    editTable(payload)
+                }
+                setRatePerMinute(0);
+                setCenturyRate(0);
+                setOneRedRate(0)
+                setSixRedRate(0)
+                setTenRedRate(0)
+                Alert.alert('Success', `Table Updated`);
+                setTableName('');
+                setRatePerMinute(0);
+                setIsLoading(false)
+                router.back();
             }
             else {
-                 addToQueue({
-                    url: `${baseUrl}/table`,
-                    id: uuid.v4().toString(),
-                    method: "POST",
-                    body: payload
-                })
-                addTable(payload)
+                setIsLoading(true)
+                const payload = {
+                    _id: getRandomId(),
+                    name: tableName,
+                    minute_rate: Number(ratePerMinute),
+                    created_by: user?._id,
+                    date: new Date(),
+                    one_red_rate: oneRedRate,
+                    six_red_rate: sixRedRate,
+                    ten_red_rate: tenRedRate,
+                    century_rate: centuryRate
+                }
+                if (isConnected) {
+                    const res = await AddTable(payload)
+                    if (res.error) {
+                        return alert(res.error)
+                    }
+                    addTable(res)
+                }
+                else {
+                    addToQueue({
+                        url: `${baseUrl}/table`,
+                        id: getRandomId(),
+                        method: "POST",
+                        body: payload
+                    })
+                    addTable(payload)
+                }
+                setRatePerMinute(0);
+                setCenturyRate(0);
+                setOneRedRate(0)
+                setSixRedRate(0)
+                setTenRedRate(0)
+
+                Alert.alert('Success', `Table "${tableName}" added at ₹${ratePerMinute}/min`);
+                setTableName('');
+                setRatePerMinute(0);
+                setIsLoading(false)
+                router.back();
             }
-            setRatePerMinute(0);
-            setCenturyRate(0);
-            setOneRedRate(0)
-            setSixRedRate(0)
-            setTenRedRate(0)
-            
-            Alert.alert('Success', `Table "${tableName}" added at ₹${ratePerMinute}/min`);
-            setTableName('');
-            
-            setRatePerMinute(0);
-            setIsLoading(false)
-            router.back();
         } catch (error) {
             console.log(error)
         }
@@ -171,7 +218,9 @@ const AddTableComp: React.FC = () => {
                 </View>
                 <TouchableOpacity style={styles.button} onPress={handleAddTable} disabled={isLoading}>
                     {!isLoading && <Ionicons name="save-outline" size={20} color="#fff" />}
-                    <Text style={styles.buttonText}>{isLoading ? <ActivityIndicator color={'#fefe'} size={'small'}/>:"Add Table"}</Text>
+                    <Text style={styles.buttonText}>{isLoading ? <ActivityIndicator color={'#fefe'} size={'small'} /> : (
+                        (table._id ? "Edit Table" : "Add Table")
+                    )}</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>

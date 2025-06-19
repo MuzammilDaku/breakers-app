@@ -43,6 +43,7 @@ interface AppStore {
   tables: Table[];
   setTables: (tables: Table[] ) => void;
   addTable: (table: Table) => void;
+  editTable:(table:Table) =>void
   addHistory: (history: History) => void;
 
   resetTableId: string;
@@ -69,7 +70,13 @@ export const useAppStore = create<AppStore>()(
 
       addTable: (table) => set({ tables: [...(get().tables || []), table] }),
       addHistory: (history) => set({ history: [...(get().history || []), history] }),
-      
+      editTable: (table) => set({
+        tables: get().tables.map((t) =>
+          t._id === table._id
+            ? { ...t, ...Object.fromEntries(Object.entries(table).filter(([k, v]) => v !== undefined && k !== '_id')) }
+            : t
+        ),
+      }),
     }),
     {
       name: 'app-store', // key in AsyncStorage

@@ -24,3 +24,9 @@ export const GetHistory = async() => {
     const json = res.data;
     return json;
 }
+
+export const updateTable = async(data:any) => {
+    const res = await Api.put("/table",data);
+    const json = res.data;
+    return json;
+}
