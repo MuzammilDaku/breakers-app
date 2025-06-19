@@ -1,7 +1,9 @@
 import HistoryModal from "@/app/history-modal";
 import { Table, useAppStore } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
-import { GetHistory, GetTables } from "@/services/table";
+import { baseUrl } from "@/services/base";
+import { DeleteTable, GetHistory, GetTables } from "@/services/table";
+import { getRandomId } from "@/services/utilities/getRandomId";
 import { isInternetConnected } from "@/services/utilities/isInternetConnected";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -58,7 +60,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
     }
 
     useEffect(() => {
-          if (queue.length === 0) {
+        if (queue.length === 0) {
             getHistory();
         }
     }, [])
@@ -136,97 +138,106 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
 };
 
 const TableCard: React.FC<Table> = (table) => {
-    const [showOptions,setShowOptions] = useState(false);
-    const handleDelete = async() => {
-        console.log(":::::::::")
-        try{
-        const isConnected = await isInternetConnected();
+    const [showOptions, setShowOptions] = useState(false);
+    const { deleteTable } = useAppStore()
+    const { addToQueue } = useOfflineStore()
+    const handleDelete = async () => {
+        if (!table._id) return;
+        try {
+            const isConnected = await isInternetConnected();
 
-        if(isConnected) {
-            console.log(table._id)
+            if (isConnected) {
+                await DeleteTable({ _id: table._id })
+            }
+            else {
+                await addToQueue({
+                    method: "DELETE",
+                    url: baseUrl + '/table',
+                    body: { _id: table._id },
+                    id: getRandomId()
+                })
+            }
+            deleteTable(table)
         }
-        else {
-
-        }
-        }
-        catch(error){ 
+        catch (error) {
             console.log(error)
         }
     }
-    return(
-    <View style={styles.card}>
-        <Image source={require("../assets/images/snooker.jpg")} style={styles.image} resizeMode="cover" />
-        <View style={styles.cardContent}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                    <View style={{ flex: 1, alignItems: "center",position:"relative",left:15 }}>
-                        <Text style={styles.tableName}>{table.name}</Text>
-                    </View>
-                </View>
-                <TouchableOpacity
-                    style={{ padding: 4 }}
-                    onPress={() => {
-                        setShowOptions(true)
-                    }}
-                >
-                    <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
-                </TouchableOpacity>
-            </View>
-            {showOptions && (
-                <>
-                    <View style={{
-                        position: "absolute",
-                        top: 40,
-                        right: 16,
-                        backgroundColor: "#fff",
-                        borderRadius: 8,
-                        elevation: 5,
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.2,
-                        shadowRadius: 4,
-                        zIndex: 10,
-                        minWidth: 120,
-                    }}>
-                        <TouchableOpacity
-                            style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: "#eee" }}
-                            onPress={() => {
-                                setShowOptions(false);
-                                router.navigate({ pathname: "/create-table", params: {table:JSON.stringify(table)} });
-                            }}
-                        >
-                            <Text style={{ color: "#2e7d32", fontSize: 16 }}><Ionicons name="create-outline" /> Edit</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{ padding: 12 }}
-                            onPress={() => {
-                                setShowOptions(false);
-                                // Use Alert for confirmation in React Native
-                                Alert.alert(
-                                    "Delete Table",
-                                    "Are you sure you want to delete this table?",
-                                    [
-                                        { text: "Cancel", style: "cancel" },
-                                        { text: "Delete", style: "destructive", onPress:handleDelete},
-                                    ]
-                                );
-                            }}
-                        >
-                            <Text style={{ color: "#c62828", fontSize: 16 }}><Ionicons name="trash-outline" /> Delete</Text>
-                        </TouchableOpacity>
+    return (
+        <View style={styles.card}>
+            <Image source={require("../assets/images/snooker.jpg")} style={styles.image} resizeMode="cover" />
+            <View style={styles.cardContent}>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                        <View style={{ flex: 1, alignItems: "center", position: "relative", left: 15 }}>
+                            <Text style={styles.tableName}>{table.name}</Text>
+                        </View>
                     </View>
                     <TouchableOpacity
-                        style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 5 }}
-                        activeOpacity={1}
-                        onPress={() => setShowOptions(false)}
-                    />
-                </>
-            )}
-            <Text style={styles.rate}>(Rs{table.minute_rate}/min)</Text>
-            <Stopwatch rate={String(table.minute_rate)} id={table._id as string} tableName={table.name} />
+                        style={{ padding: 4 }}
+                        onPress={() => {
+                            setShowOptions(true)
+                        }}
+                    >
+                        <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+                    </TouchableOpacity>
+                </View>
+                {showOptions && (
+                    <>
+                        <View style={{
+                            position: "absolute",
+                            top: 40,
+                            right: 16,
+                            backgroundColor: "#fff",
+                            borderRadius: 8,
+                            elevation: 5,
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.2,
+                            shadowRadius: 4,
+                            zIndex: 10,
+                            minWidth: 120,
+                        }}>
+                            <TouchableOpacity
+                                style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: "#eee" }}
+                                onPress={() => {
+                                    setShowOptions(false);
+                                    router.navigate({ pathname: "/create-table", params: { table: JSON.stringify(table) } });
+                                }}
+                            >
+                                <Text style={{ color: "#2e7d32", fontSize: 16 }}><Ionicons name="create-outline" /> Edit</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={{ padding: 12 }}
+                                onPress={() => {
+                                    setShowOptions(false);
+                                    // Use Alert for confirmation in React Native
+                                    Alert.alert(
+                                        "Delete Table",
+                                        "Are you sure you want to delete this table?",
+                                        [
+                                            { text: "Cancel", style: "cancel" },
+                                            { text: "Delete", style: "destructive", onPress: handleDelete },
+                                        ]
+                                    );
+                                }}
+                            >
+                                <Text style={{ color: "#c62828", fontSize: 16 }}><Ionicons name="trash-outline" /> Delete</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity
+                            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 5 }}
+                            activeOpacity={1}
+                            onPress={() => setShowOptions(false)}
+                        />
+                    </>
+                )}
+                <Text style={styles.rate}>(Rs{table.minute_rate}/min)</Text>
+                <Stopwatch rate={String(table.minute_rate)} id={table._id as string} tableName={table.name} />
+            </View>
         </View>
-    </View>
-);}
+    );
+}
 
 const TableCreate = () => {
     return (

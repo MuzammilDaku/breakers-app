@@ -30,3 +30,10 @@ export const updateTable = async(data:any) => {
     const json = res.data;
     return json;
 }
+
+
+export const DeleteTable = async(data:any) => {
+    const res = await Api.delete("/table",data);
+    const json = res.data;
+    return json;
+}

@@ -136,7 +136,7 @@ const AddTableComp: React.FC = () => {
                 <View style={styles.titleContainer}>
                     <Ionicons name="add-circle-outline" size={28} color="#2e86de" />
                     <Text style={styles.heading}>
-                        Add Snooker Table
+                        {table._id ? "Edit Table":"Add Snooker Table"}
                     </Text>
                 </View>
                 <View style={styles.inputContainer}>

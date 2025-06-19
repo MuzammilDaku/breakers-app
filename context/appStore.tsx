@@ -44,6 +44,8 @@ interface AppStore {
   setTables: (tables: Table[] ) => void;
   addTable: (table: Table) => void;
   editTable:(table:Table) =>void
+  deleteTable:(table:Table) =>void
+
   addHistory: (history: History) => void;
 
   resetTableId: string;
@@ -77,6 +79,10 @@ export const useAppStore = create<AppStore>()(
             : t
         ),
       }),
+      deleteTable:(table:Table) => {
+        set({ tables: get().tables.filter((item) => item._id !== table._id) });
+        // set({})
+      }
     }),
     {
       name: 'app-store', // key in AsyncStorage
