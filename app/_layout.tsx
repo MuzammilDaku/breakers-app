@@ -33,6 +33,7 @@ export default function RootLayout() {
               title: "View & Print Bill"
             }}
           />
+          
         </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

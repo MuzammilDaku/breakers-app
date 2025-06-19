@@ -1,8 +1,9 @@
 import { Tabs, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useAppStore } from '@/context/appStore';
+import { MaterialIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function TabLayout() {
   const router = useRouter();
@@ -29,17 +30,24 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false
+      headerShown: false
       }}
     >
       <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
+      name="index"
+      options={{
+        title: 'Home',
+        tabBarIcon: ({ color }) => <MaterialIcons name='home-filled' color={color} size={28}/> ,
+      }}
       />
 
+      <Tabs.Screen
+      name="dashboard"
+      options={{
+        title: 'Dashboard',
+        tabBarIcon: ({ color }) => <MaterialCommunityIcons name="view-dashboard" size={28} color={color} />,
+      }}
+      />
     </Tabs>
   );
 }

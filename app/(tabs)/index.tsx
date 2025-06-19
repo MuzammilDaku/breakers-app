@@ -33,7 +33,9 @@ export default function HomeScreen() {
     };
   }, []);
   return (
+    <>
     <GetTablesComp />
+    </>
   );
 }
 

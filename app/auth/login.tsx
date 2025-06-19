@@ -4,21 +4,23 @@ import { Ionicons } from "@expo/vector-icons";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function LoginScreen() {
-  const { setUser ,user} = useAppStore();
+  const { setUser, user } = useAppStore();
   const [credentials, setCredentials] = useState<{ phone: string, password: string }>({
     phone: "03121212121",
     password: "Test12@"
   });
 
+  const [isLoading, setIsLoading] = useState(false)
   const handleSubmit = async () => {
     try {
       if (!credentials.phone || !credentials.password) {
         alert("Please fill in all fields");
         return;
       }
+      setIsLoading(true)
       // Here you would typically call your login API
       // For example:
       const response = await LoginUser(credentials);
@@ -32,6 +34,9 @@ export default function LoginScreen() {
     } catch (error) {
       console.log("Login error:", error);
     }
+    finally {
+      setIsLoading(false)
+    }
 
   };
 
@@ -43,12 +48,12 @@ export default function LoginScreen() {
     }));
   };
 
-  useEffect(()=>{
-    
-    if(user){
+  useEffect(() => {
+
+    if (user) {
       router.navigate("/(tabs)")
     }
-  },[router])
+  }, [router])
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
@@ -79,9 +84,9 @@ export default function LoginScreen() {
       <TouchableOpacity
         style={styles.button}
         onPress={handleSubmit}
-      // disabled={!isValid}
+        disabled={isLoading}
       >
-        <Text style={styles.buttonText}>Login</Text>
+        <Text style={styles.buttonText}>{isLoading?  <ActivityIndicator color={'#fefe'}/> :"Login"}</Text>
       </TouchableOpacity>
 
       <View />
