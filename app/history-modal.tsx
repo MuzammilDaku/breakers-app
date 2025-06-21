@@ -13,8 +13,8 @@ export default function HistoryModal({ visible, onClose, history }: { visible: b
                             <View style={styles.tableHeader}>
                                 <Text style={[styles.cell, styles.header]}>Date</Text>
                                 <Text style={[styles.cell, styles.header]}>Customer Name</Text>
-                                <Text style={[styles.cell, styles.header]}>Customer Name</Text>
                                 <Text style={[styles.cell, styles.header]}>Customer Phone</Text>
+                                <Text style={[styles.cell, styles.header]}>Game Type</Text>
                                 <Text style={[styles.cell, styles.header]}>Total Frame</Text>
                                 <Text style={[styles.cell, styles.header]}>Total Bill</Text>
                                 <Text style={[styles.cell, styles.header]}>Received Amount</Text>
@@ -24,8 +24,8 @@ export default function HistoryModal({ visible, onClose, history }: { visible: b
                                     <View key={item._id} style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}>
                                         <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.date && item.date.slice(0,10)}</Text>
                                         <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.customer_name}</Text>
-                                        <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.customer_name}</Text>
                                         <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.customer_phone}</Text>
+                                        <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.type}</Text>
                                         <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.total_frame}</Text>
                                         <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.total_bill}</Text>
                                         <Text style={styles.cell} numberOfLines={1} ellipsizeMode="tail">{item?.received_amount}</Text>

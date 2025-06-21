@@ -9,8 +9,7 @@ import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
 export default function Modal() {
   const params = useLocalSearchParams();
-  const { table_name, rate, total_bill, total_frame, table_id } = params
-
+  const { table_name, rate, total_bill, total_frame, table_id,selectedGame } = params
   const {setResetTableId,user,addHistory} = useAppStore();
   const [customerName, setCustomerName] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
@@ -35,7 +34,8 @@ export default function Modal() {
       status: Number(receivedAmount) == Number(total_bill) ? "paid" : "unpaid",
       created_by: user?._id,
       _id:getRandomId(),
-      date:new Date().toISOString()
+      date:new Date().toISOString(),
+      type:selectedGame as string
     };
 
     const isConnected = await isInternetConnected();
@@ -66,6 +66,10 @@ export default function Modal() {
         <View style={paramStyles.row}>
           <Text style={paramStyles.key}>Table Name</Text>
           <Text style={paramStyles.value}>{table_name}</Text>
+        </View>
+        <View style={paramStyles.row}>
+          <Text style={paramStyles.key}>Game Type</Text>
+          <Text style={paramStyles.value}>{selectedGame}</Text>
         </View>
         <View style={paramStyles.row}>
           <Text style={paramStyles.key}>Table Rate</Text>

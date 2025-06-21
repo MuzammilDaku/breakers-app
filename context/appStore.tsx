@@ -19,6 +19,7 @@ export interface Table {
   ten_red_rate: Number;
   century_rate: Number;
   one_red_rate: Number
+  fifteen_red_rate:Number;
   _id?:string;
   date?:Date
 }
@@ -34,6 +35,7 @@ export interface History {
   received_amount: number;
   date: any;
   _id: string;
+  type:string;
 }
 
 interface AppStore {

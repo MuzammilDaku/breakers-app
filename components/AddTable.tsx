@@ -15,8 +15,6 @@ const AddTableComp: React.FC = () => {
     const tableStr = Array.isArray(params?.table) ? params.table[0] : params?.table;
     const table: Table = tableStr ? JSON.parse(tableStr) : null;
     const [tableName, setTableName] = useState(table?.name ? table.name : '');
-    const [ratePerMinute, setRatePerMinute] = useState<number>(table?.minute_rate ? Number(table.minute_rate) : 0);
-    const [ratePerMinuteInput, setRatePerMinuteInput] = useState(table?.minute_rate ? String(table.minute_rate) : '');
 
     const [centuryRateInput, setCenturyRateInput] = useState(table?.century_rate ? String(table.century_rate) : '');
     const [centuryRate, setCenturyRate] = useState<number>(table?.century_rate ? Number(table.century_rate) : 0)
@@ -30,13 +28,17 @@ const AddTableComp: React.FC = () => {
     const [sixRedRateInput, setSixRedRateInput] = useState(table?.six_red_rate ? String(table.six_red_rate) : '');
     const [sixRedRate, setSixRedRate] = useState<number>(table?.six_red_rate ? Number(table.six_red_rate) : 0)
 
+    const [fifteenRedRateInput, setFifteenRedRateInput] = useState(table?.fifteen_red_rate ? String(table.fifteen_red_rate) : '');
+    const [fifteenRedRate, setFifteenRedRate] = useState<number>(table?.fifteen_red_rate ? Number(table.fifteen_red_rate) : 0)
+
     const { user, addTable, editTable } = useAppStore();
     const { addToQueue } = useOfflineStore()
 
     const [isLoading, setIsLoading] = useState(false);
+    
     const handleAddTable = async () => {
         try {
-            if (!tableName.trim() || !ratePerMinute || !oneRedRate || !centuryRate || !sixRedRate || !tenRedRate || !user) {
+            if (!tableName.trim() || !oneRedRate || !centuryRate || !sixRedRate || !tenRedRate || !user || !fifteenRedRate) {
                 Alert.alert('Error', 'Please fill in all fields.');
                 return;
             }
@@ -50,12 +52,12 @@ const AddTableComp: React.FC = () => {
                 const payload = {
                     _id: table._id,
                     name: tableName,
-                    minute_rate: Number(ratePerMinute),
                     created_by: user?._id,
                     one_red_rate: oneRedRate,
                     six_red_rate: sixRedRate,
                     ten_red_rate: tenRedRate,
-                    century_rate: centuryRate
+                    century_rate: centuryRate,
+                    fifteen_red_rate: fifteenRedRate
                 }
 
                 if (isConnected) {
@@ -75,28 +77,28 @@ const AddTableComp: React.FC = () => {
                     })
                     editTable(payload)
                 }
-                setRatePerMinute(0);
                 setCenturyRate(0);
                 setOneRedRate(0)
                 setSixRedRate(0)
                 setTenRedRate(0)
-                Alert.alert('Success', `Table Updated`);
                 setTableName('');
-                setRatePerMinute(0);
                 setIsLoading(false)
+                setFifteenRedRateInput('')
+                setFifteenRedRate(0)
+                Alert.alert('Success', `Table Updated`);
                 router.back();
             }
             else {
                 const payload = {
                     _id: getRandomId(),
                     name: tableName,
-                    minute_rate: Number(ratePerMinute),
                     created_by: user?._id,
                     date: new Date(),
                     one_red_rate: oneRedRate,
                     six_red_rate: sixRedRate,
                     ten_red_rate: tenRedRate,
-                    century_rate: centuryRate
+                    century_rate: centuryRate,
+                    fifteen_red_rate: fifteenRedRate
                 }
                 if (isConnected) {
                     const res = await AddTable(payload)
@@ -114,15 +116,13 @@ const AddTableComp: React.FC = () => {
                     })
                     addTable(payload)
                 }
-                setRatePerMinute(0);
+                Alert.alert('Success', `Table "${tableName}" Added`);
                 setCenturyRate(0);
                 setOneRedRate(0)
                 setSixRedRate(0)
                 setTenRedRate(0)
-
-                Alert.alert('Success', `Table "${tableName}" added at ₹${ratePerMinute}/min`);
+                setFifteenRedRate(0)
                 setTableName('');
-                setRatePerMinute(0);
                 setIsLoading(false)
                 router.back();
             }
@@ -153,19 +153,6 @@ const AddTableComp: React.FC = () => {
                     <Ionicons name="cash-outline" size={20} color="#636e72" style={styles.icon} />
                     <TextInput
                         style={styles.input}
-                        placeholder="Rate per Minute"
-                        value={ratePerMinuteInput}
-                        onChangeText={text => {
-                            const numeric = text.replace(/[^0-9]/g, '');
-                            setRatePerMinuteInput(numeric)
-                            setRatePerMinute(numeric ? parseInt(numeric, 10) : 0);
-                        }} keyboardType="numeric"
-                    />
-                </View>
-                <View style={styles.inputContainer}>
-                    <Ionicons name="cash-outline" size={20} color="#636e72" style={styles.icon} />
-                    <TextInput
-                        style={styles.input}
                         placeholder="Century Rate"
                         value={centuryRateInput}
                         onChangeText={text => {
@@ -185,7 +172,7 @@ const AddTableComp: React.FC = () => {
                         onChangeText={text => {
                             const numeric = text.replace(/[^0-9]/g, '');
                             setOneRedRateInput(numeric)
-                            setOneRedRate(numeric ? parseInt(numeric, 10) : 0);
+                            setOneRedRate(numeric ? parseInt(numeric, 10) : 0); setCenturyRate
                         }} keyboardType="numeric"
                     />
                 </View>
@@ -211,8 +198,22 @@ const AddTableComp: React.FC = () => {
                         value={tenRedRateInput}
                         onChangeText={text => {
                             const numeric = text.replace(/[^0-9]/g, '');
-                            setTenRedRateInput(text)
+                            setTenRedRateInput(numeric)
                             setTenRedRate(numeric ? parseInt(numeric, 10) : 0);
+                        }}
+                        keyboardType="numeric"
+                    />
+                </View>
+                <View style={styles.inputContainer}>
+                    <Ionicons name="cash-outline" size={20} color="#636e72" style={styles.icon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Fifteen Red Rate"
+                        value={fifteenRedRateInput}
+                        onChangeText={text => {
+                            const numeric = text.replace(/[^0-9]/g, '');
+                            setFifteenRedRateInput(numeric)
+                            setFifteenRedRate(numeric ? parseInt(numeric, 10) : 0);
                         }}
                         keyboardType="numeric"
                     />

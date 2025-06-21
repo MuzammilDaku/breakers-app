@@ -6,8 +6,8 @@ export const AddTable = async(data:any) => {
     return json;
 }
 
-export const GetTables = async() => {
-    const res = await Api.get("/table");
+export const GetTables = async(id:string) => {
+    const res = await Api.get(`/table?user_id=${id}`);
     const json = res.data;
     return json;
 }
@@ -19,8 +19,8 @@ export const AddCheckIn = async (data:any) => {
 }
 
 
-export const GetHistory = async() => {
-    const res = await Api.get("/check-in");
+export const GetHistory = async(id:string) => {
+    const res = await Api.get(`/check-in?user_id=${id}`);
     const json = res.data;
     return json;
 }

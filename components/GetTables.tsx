@@ -9,20 +9,12 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-type TableProps = {
-    name: string;
-    minute_rate: string;
-    _id: string
-};
-
 
 type StopwatchProps = {
-    rate: string;
-    id: string;
-    tableName: string;
+    table: Table
 };
 
-const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
+const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
     const { user, resetTableId, setResetTableId, setHistory, history } = useAppStore();
     const [running, setRunning] = useState(false);
     const [payloadCheckIn, setPayloadCheckIn] = useState({
@@ -33,11 +25,10 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
     })
 
     const [counter, setCounter] = useState(0);
-    const { queue } = useOfflineStore()
+    const { queue, hasLoaded } = useOfflineStore()
 
     useEffect(() => {
-        setPayloadCheckIn({ ...payloadCheckIn, total_frame: counter, total_bill: counter * Number(rate), table_id: id, created_by: user?._id })
-        console.log(queue)
+        setPayloadCheckIn({ ...payloadCheckIn, total_frame: counter, total_bill: counter * Number(table.century_rate), table_id: table._id as string, created_by: user?._id })
     }, [counter])
 
     const handleCheckOut = async () => {
@@ -45,28 +36,30 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
         router.navigate({
             pathname: '/modal',
             params: {
-                table_name: tableName,
-                rate,
-                total_bill: counter * Number(rate),
+                table_name: table.name,
+                rate: selectedGame == "One Red" ? String(table.one_red_rate) : selectedGame == "Six Red" ? String(table.six_red_rate) : selectedGame == "Ten Red" ? String(table.ten_red_rate) :selectedGame == "Fifteen Red" ? String(table.fifteen_red_rate) : String(table.century_rate),
+                total_bill: counter * Number(selectedGame == "One Red" ? (table.one_red_rate):selectedGame == "Siz Red" ? (table.six_red_rate):selectedGame == "Ten Red" ? (table.ten_red_rate):selectedGame == "Fifteen Red" ? (table.fifteen_red_rate):selectedGame == "Century" ? (table.century_rate):0),
                 total_frame: counter,
-                table_id: id
+                table_id: table._id,
+                selectedGame: selectedGame
             }
         });
     }
 
     async function getHistory() {
-        const res = await GetHistory();
+        if (!user?._id) return;
+        const res = await GetHistory(user._id);
         setHistory(res);
     }
 
     useEffect(() => {
-        if (queue.length === 0) {
+        if (hasLoaded && queue.length === 0 && user?._id) {
             getHistory();
         }
-    }, [])
+    }, [hasLoaded])
 
     useEffect(() => {
-        if (resetTableId == id) {
+        if (resetTableId == table._id) {
             setCounter(0);
             setRunning(false);
             setResetTableId("")
@@ -74,16 +67,37 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
     }, [resetTableId])
 
     const [showModal, setShowModal] = useState(false);
+    const [selectedGame, setSelectedGame] = useState("")
 
     const onCloseModal = () => {
         setShowModal(false)
     }
+
+    const [showGameModal, setShowGameModal] = useState(false);
+
+    const selectedGameText = () => {
+        switch (selectedGame) {
+            case "One Red":
+            return `One Red (Rs${table.one_red_rate}/frame)`;
+            case "Six Red":
+            return `Six Red (Rs${table.six_red_rate}/frame)`;
+            case "Ten Red":
+            return `Ten Red (Rs${table.ten_red_rate}/frame)`;
+            case "Fifteen Red":
+            return `Fifteen Red (Rs${table.fifteen_red_rate}/frame)`;
+            case "Century":
+            return `Century (Rs${table.century_rate}/min)`;
+            default:
+            return "";
+        }
+    }
+
     return (
         <View style={styles.stopwatchContainer}>
-            {/* <Text style={styles.timeText}>{formatTime(seconds)}</Text> */}
+                {selectedGame && <Text style={styles.rate}>{selectedGameText()}</Text>}
             <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                <HistoryModal visible={showModal} onClose={onCloseModal} history={Array.isArray(history) ? history.filter((e: any) => e.table_id === id) : []} />
-                {Array.isArray(history) && history.some((e: any) => e.table_id === id) && (
+                <HistoryModal visible={showModal} onClose={onCloseModal} history={Array.isArray(history) ? history.filter((e: any) => e.table_id === table._id) : []} />
+                {Array.isArray(history) && history.some((e: any) => e.table_id === table._id) && (
                     <TouchableOpacity
                         onPress={() => {
                             setShowModal(true)
@@ -110,20 +124,79 @@ const Stopwatch: React.FC<StopwatchProps> = ({ rate, id, tableName }) => {
                         <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <Text style={styles.timeText}>{counter}</Text>
                             <Text style={styles.timeText}>
-                                Rs {counter * Number(rate)}
+                                Rs {counter * Number(selectedGame == 'One Red' ? table.one_red_rate : selectedGame == 'Six Red' ? table.six_red_rate :
+                                    selectedGame == 'Ten Red' ? table.ten_red_rate : selectedGame == "Fifteen Red"? table.fifteen_red_rate : table.century_rate
+                                )}
                             </Text>
                         </View>
                     </>
                 )}
-                {!running && (
+                {!running && !showGameModal && (
                     <TouchableOpacity
                         onPress={() => {
-                            setRunning(!running);
+                            // setRunning(!running);
+                            setShowGameModal(true)
                         }}
                         style={styles.button}
                     >
                         <Text style={styles.buttonText}><Ionicons name="play" /> Play Game</Text>
+                        {/* Game selection modal */}
+
                     </TouchableOpacity>
+
+                )}
+
+                {running === false && showGameModal && (
+                    <View style={{
+                        position: "relative",
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        zIndex: 100,
+                    }}>
+                        <View style={{
+                            backgroundColor: "#fff",
+                            borderRadius: 10,
+                            padding: 24,
+                            minWidth: 250,
+                            alignItems: "center"
+                        }}>
+                            <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 16, color: "#222" }}>Select Game</Text>
+                            {["One Red", "Six Red", "Ten Red", "Fifteen Red", "Century","Fifteen Red"].map((game, idx) => (
+                                <TouchableOpacity
+                                    key={game}
+                                    style={{
+                                        paddingVertical: 10,
+                                        paddingHorizontal: 24,
+                                        marginVertical: 4,
+                                        backgroundColor: "#2e7d32",
+                                        borderRadius: 6,
+                                        width: 180,
+                                    }}
+                                    onPress={() => {
+                                        setSelectedGame(game);
+                                        setShowGameModal(false);
+                                        setRunning(true);
+                                    }}
+                                >
+                                    <Text style={{ color: "#fff", fontSize: 16, textAlign: "center" }}>{idx + 1}- {game}</Text>
+                                </TouchableOpacity>
+                            ))}
+                            <TouchableOpacity
+                                style={{
+                                    marginTop: 12,
+                                    paddingVertical: 8,
+                                    paddingHorizontal: 24,
+                                    backgroundColor: "#c62828",
+                                    borderRadius: 6,
+                                }}
+                                onPress={() => setShowGameModal(false)}
+                            >
+                                <Text style={{ color: "#fff", fontSize: 16 }}>Cancel</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 )}
 
                 {running && <TouchableOpacity
@@ -232,8 +305,7 @@ const TableCard: React.FC<Table> = (table) => {
                         />
                     </>
                 )}
-                <Text style={styles.rate}>(Rs{table.minute_rate}/min)</Text>
-                <Stopwatch rate={String(table.minute_rate)} id={table._id as string} tableName={table.name} />
+                <Stopwatch table={table} />
             </View>
         </View>
     );
@@ -264,14 +336,14 @@ const TableCardCreate: React.FC = () => (
 );
 
 const GetTablesComp: React.FC = () => {
-    const { tables, setTables } = useAppStore();
-    const { queue } = useOfflineStore()
+    const { tables, setTables, user } = useAppStore();
+    const { queue, hasLoaded } = useOfflineStore()
     useEffect(() => {
 
         async function fetchTables() {
             try {
-
-                const response = await GetTables();
+                if (!user) return;
+                const response = await GetTables(user._id);
                 if (response && Array.isArray(response)) {
                     setTables(response);
                 }
@@ -279,10 +351,10 @@ const GetTablesComp: React.FC = () => {
                 console.error("Error fetching tables:", error);
             }
         }
-        if (queue.length === 0) {
+        if (hasLoaded && queue.length === 0) {
             fetchTables();
         }
-    }, [])
+    }, [hasLoaded])
     return (
         <ScrollView contentContainerStyle={styles.container}>
             {tables?.map((table) => (

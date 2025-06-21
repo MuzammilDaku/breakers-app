@@ -12,10 +12,11 @@ type OfflineApiCall = {
 type OfflineStore = {
   queue: OfflineApiCall[];
   syncing: boolean;
+  hasLoaded: boolean; // 👈 add this
   addToQueue: (call: OfflineApiCall) => void;
   syncQueue: () => Promise<void>;
-  
 };
+
 
 const QUEUE_KEY = "offline_api_queue";
 
@@ -29,6 +30,7 @@ export const useOfflineStore = create<OfflineStore>((set, get) => {
     if (data) {
       set({ queue: JSON.parse(data) });
     }
+    set({hasLoaded:true})
   };
 
   loadQueue();
@@ -36,6 +38,7 @@ export const useOfflineStore = create<OfflineStore>((set, get) => {
   return {
     queue: [],
     syncing:false,
+    hasLoaded:false,
 
     addToQueue: (call) => {
       const updatedQueue = [...get().queue, call];
