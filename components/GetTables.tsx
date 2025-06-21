@@ -56,7 +56,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
         if (hasLoaded && queue.length === 0 && user?._id) {
             getHistory();
         }
-    }, [hasLoaded])
+    }, [hasLoaded,user])
 
     useEffect(() => {
         if (resetTableId == table._id) {
@@ -163,9 +163,9 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
                             alignItems: "center"
                         }}>
                             <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 16, color: "#222" }}>Select Game</Text>
-                            {["One Red", "Six Red", "Ten Red", "Fifteen Red", "Century","Fifteen Red"].map((game, idx) => (
+                            {["One Red", "Six Red", "Ten Red", "Fifteen Red", "Century"].map((game, idx) => (
                                 <TouchableOpacity
-                                    key={game}
+                                    key={idx}
                                     style={{
                                         paddingVertical: 10,
                                         paddingHorizontal: 24,
@@ -354,7 +354,7 @@ const GetTablesComp: React.FC = () => {
         if (hasLoaded && queue.length === 0) {
             fetchTables();
         }
-    }, [hasLoaded])
+    }, [hasLoaded,user])
     return (
         <ScrollView contentContainerStyle={styles.container}>
             {tables?.map((table) => (
