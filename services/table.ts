@@ -33,7 +33,7 @@ export const updateTable = async(data:any) => {
 
 
 export const DeleteTable = async(data:any) => {
-    const res = await Api.delete("/table",data);
+    const res = await Api.delete(`/table?user_id=${data._id}`);
     const json = res.data;
     return json;
 }

@@ -9,6 +9,7 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import GamesModal from "./GamesModal";
 
 type StopwatchProps = {
     table: Table
@@ -32,16 +33,13 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
     }, [counter])
 
     const handleCheckOut = async () => {
-        // setRunning(false)        
+        // setRunning(false)   
+        setShowGameModal(false);     
         router.navigate({
             pathname: '/modal',
             params: {
-                table_name: table.name,
-                rate: selectedGame == "One Red" ? String(table.one_red_rate) : selectedGame == "Six Red" ? String(table.six_red_rate) : selectedGame == "Ten Red" ? String(table.ten_red_rate) :selectedGame == "Fifteen Red" ? String(table.fifteen_red_rate) : String(table.century_rate),
-                total_bill: counter * Number(selectedGame == "One Red" ? (table.one_red_rate):selectedGame == "Siz Red" ? (table.six_red_rate):selectedGame == "Ten Red" ? (table.ten_red_rate):selectedGame == "Fifteen Red" ? (table.fifteen_red_rate):selectedGame == "Century" ? (table.century_rate):0),
-                total_frame: counter,
-                table_id: table._id,
-                selectedGame: selectedGame
+                table:JSON.stringify(table),
+                selectedGames:JSON.stringify(selectedGames)
             }
         });
     }
@@ -56,7 +54,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
         if (hasLoaded && queue.length === 0 && user?._id) {
             getHistory();
         }
-    }, [hasLoaded,user])
+    }, [hasLoaded, user])
 
     useEffect(() => {
         if (resetTableId == table._id) {
@@ -69,6 +67,8 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
     const [showModal, setShowModal] = useState(false);
     const [selectedGame, setSelectedGame] = useState("")
 
+
+
     const onCloseModal = () => {
         setShowModal(false)
     }
@@ -78,25 +78,58 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
     const selectedGameText = () => {
         switch (selectedGame) {
             case "One Red":
-            return `One Red (Rs${table.one_red_rate}/frame)`;
+                return `One Red (Rs${table.one_red_rate}/frame)`;
             case "Six Red":
-            return `Six Red (Rs${table.six_red_rate}/frame)`;
+                return `Six Red (Rs${table.six_red_rate}/frame)`;
             case "Ten Red":
-            return `Ten Red (Rs${table.ten_red_rate}/frame)`;
+                return `Ten Red (Rs${table.ten_red_rate}/frame)`;
             case "Fifteen Red":
-            return `Fifteen Red (Rs${table.fifteen_red_rate}/frame)`;
+                return `Fifteen Red (Rs${table.fifteen_red_rate}/frame)`;
             case "Century":
-            return `Century (Rs${table.century_rate}/min)`;
+                return `Century (Rs${table.century_rate}/min)`;
             default:
-            return "";
+                return "";
         }
     }
 
+    const onCloseGameModal = () => {
+        setShowGameModal(false);
+    }
+
+    const [centuryTimer, setCenturyTimer] = useState(0);
+    const [selectedGames, setSelectedGames] = useState({
+        ten_red: 0,
+        one_red: 0,
+        six_red: 0,
+        fifteen_red: 0,
+        century: centuryTimer
+    })
+    
+
+    const [startStopWatch, setStartSportWatch] = useState(false);
+
+    // Timer logic for Century mode
+    useEffect(() => {
+        let timer: ReturnType<typeof setInterval> | null = null;
+        if (startStopWatch) {
+            timer = setInterval(() => {
+                setCenturyTimer((prev) => prev + 1);
+            }, 1000); // 1 second interval
+        }
+        // If startStopWatch is false, timer is not running (paused)
+        return () => {
+            if (timer) clearInterval(timer);
+        };
+    }, [startStopWatch]);
+
+
+
     return (
         <View style={styles.stopwatchContainer}>
-                {selectedGame && <Text style={styles.rate}>{selectedGameText()}</Text>}
+            {selectedGame && <Text style={styles.rate}>{selectedGameText()}</Text>}
             <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                 <HistoryModal visible={showModal} onClose={onCloseModal} history={Array.isArray(history) ? history.filter((e: any) => e.table_id === table._id) : []} />
+                <GamesModal visible={showGameModal} onClose={onCloseGameModal} selectedGames={selectedGames} setSelectedGames={setSelectedGames} startStopWatch={startStopWatch} setStartSportWatch={setStartSportWatch} centuryTimer={centuryTimer} setCenturyTimer={setCenturyTimer} handleCheckOut={handleCheckOut}/>
                 {Array.isArray(history) && history.some((e: any) => e.table_id === table._id) && (
                     <TouchableOpacity
                         onPress={() => {
@@ -125,7 +158,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
                             <Text style={styles.timeText}>{counter}</Text>
                             <Text style={styles.timeText}>
                                 Rs {counter * Number(selectedGame == 'One Red' ? table.one_red_rate : selectedGame == 'Six Red' ? table.six_red_rate :
-                                    selectedGame == 'Ten Red' ? table.ten_red_rate : selectedGame == "Fifteen Red"? table.fifteen_red_rate : table.century_rate
+                                    selectedGame == 'Ten Red' ? table.ten_red_rate : selectedGame == "Fifteen Red" ? table.fifteen_red_rate : table.century_rate
                                 )}
                             </Text>
                         </View>
@@ -146,7 +179,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
 
                 )}
 
-                {running === false && showGameModal && (
+                {/* {running === false && showGameModal && (
                     <View style={{
                         position: "relative",
                         top: 0, left: 0, right: 0, bottom: 0,
@@ -197,7 +230,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                )}
+                )} */}
 
                 {running && <TouchableOpacity
                     onPress={handleCheckOut}
@@ -354,7 +387,7 @@ const GetTablesComp: React.FC = () => {
         if (hasLoaded && queue.length === 0) {
             fetchTables();
         }
-    }, [hasLoaded,user])
+    }, [hasLoaded, user])
     return (
         <ScrollView contentContainerStyle={styles.container}>
             {tables?.map((table) => (
