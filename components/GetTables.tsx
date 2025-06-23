@@ -39,7 +39,8 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
             pathname: '/modal',
             params: {
                 table:JSON.stringify(table),
-                selectedGames:JSON.stringify(selectedGames)
+                selectedGames:JSON.stringify(selectedGames),
+                centuryTimer:String(centuryTimer)
             }
         });
     }
@@ -102,7 +103,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
         one_red: 0,
         six_red: 0,
         fifteen_red: 0,
-        century: centuryTimer
+        century: 0
     })
     
 
@@ -113,7 +114,14 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
         let timer: ReturnType<typeof setInterval> | null = null;
         if (startStopWatch) {
             timer = setInterval(() => {
-                setCenturyTimer((prev) => prev + 1);
+                setCenturyTimer((prev) => {
+                    const newValue = prev + 1;
+                    setSelectedGames((games) => ({
+                        ...games,
+                        century: newValue
+                    }));
+                    return newValue;
+                });
             }, 1000); // 1 second interval
         }
         // If startStopWatch is false, timer is not running (paused)

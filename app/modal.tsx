@@ -1,26 +1,34 @@
 import { useAppStore } from '@/context/appStore';
 import { useOfflineStore } from '@/context/offlineStore';
+import { baseUrl } from '@/services/base';
+import { AddCheckIn } from '@/services/table';
+import { getRandomId } from '@/services/utilities/getRandomId';
+import { isInternetConnected } from '@/services/utilities/isInternetConnected';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
 export default function Modal() {
   const params = useLocalSearchParams();
-  // const { table,selectedGames } = params
   const table = JSON.parse(Array.isArray(params.table) ? params.table[0] : params.table)
   const selectedGames = JSON.parse(Array.isArray(params.selectedGames) ? params.selectedGames[0] : params.selectedGames)
-
   const selected = Object.entries(selectedGames).filter(([key, value]) => value !== 0).map(([key]) => key)
-  console.log(selectedGames)
 
-  const formatted = selected.map(item =>
-    item
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
-  );
+const totalFrames = Object.entries(selectedGames)
+  .filter(([key]) => key !== 'century')
+  .reduce((sum, [, value]:any) => sum + value, 0);
+    // console.log(totalFrames)
+
+  const formatted = selected
+    .map(item =>
+      item
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+    )
+    .join(', ');
 
   const frames = Object.entries(selectedGames)
-    .filter(([_, value]) => value !== 0)
+    .filter(([key, value]) => key !== 'century' && value !== 0)
     .map(([key, value]) =>
       key
         .split('_')
@@ -29,17 +37,32 @@ export default function Modal() {
     )
     .join(' ');
 
+  const rates = selected
+    .filter(key => table[`${key}_rate`] !== undefined)
+    .map((key, idx) => {
+      const label = key
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, l => l.toUpperCase());
+      const rate = table[`${key}_rate`];
+      return `${label}: ${rate + ' Rs'}${idx < selected.filter(k => table[`${k}_rate`] !== undefined).length - 1 ? ', ' : ''}`;
+    })
+
   const totalBill = Object.entries(selectedGames).reduce((total, [key, value]) => {
-    // @ts-expect-error
-    if (value > 0) {
-      const rateKey = `${key}_rate`;
-      const rate = table[rateKey] || 0;
-      // @ts-expect-error
-      total += value * rate;
+    const numValue = Number(value);
+    if (numValue > 0) {
+      if (key === 'century') {
+        // Convert seconds to minutes and multiply by minute rate
+        total += (numValue / 60) * (table.century_rate || 0);
+      } else {
+        const rateKey = `${key}_rate`;
+        const rate = table[rateKey] || 0;
+        total += numValue * rate;
+      }
     }
-    return total;
+    return Math.round(total);
   }, 0);
-   const { setResetTableId, user, addHistory } = useAppStore();
+
+  const { setResetTableId, user, addHistory } = useAppStore();
   const [customerName, setCustomerName] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
   const [receivedAmount, setReceivedAmount] = useState("")
@@ -47,48 +70,51 @@ export default function Modal() {
   const [loader, setLoader] = useState(false);
   const { addToQueue } = useOfflineStore()
 
-  // const handleAddCheckIn = async () => {
-  //   if (!customerName || !customerPhone || !receivedAmount) {
-  //     return alert("Please fill in all fields !")
-  //   }
-  //   setLoader(true)
+  const handleAddCheckIn = async () => {
+    if (!customerName || !customerPhone || !receivedAmount) {
+      return alert("Please fill in all fields !")
+    }
+    setLoader(true)
 
-  //   const payload = {
-  //     table_id:table_id as string,
-  //     total_frame:Number(total_frame),
-  //     customer_name: customerName,
-  //     customer_phone: customerPhone,  
-  //     received_amount: Number(receivedAmount),
-  //     total_bill:Number(total_bill),
-  //     status: Number(receivedAmount) == Number(total_bill) ? "paid" : "unpaid",
-  //     created_by: user?._id,
-  //     _id:getRandomId(),
-  //     date:new Date().toISOString(),
-  //     type:selectedGame as string
-  //   };
+    const payload = {
+      table_id:table._id as string,
+      frames:frames,
+      types:formatted,
+      total_frame:totalFrames,
+      table_name:table.name,
+      time_played:String(selectedGames.century) ,
+      customer_name: customerName,
+      customer_phone: customerPhone,  
+      received_amount: Number(receivedAmount),
+      total_bill:totalBill,
+      created_by: user?._id,
+      _id:getRandomId(),
+      date:new Date()
+    };
 
-  //   const isConnected = await isInternetConnected();
 
-  //   if(isConnected) {
-  //     const response = await AddCheckIn(payload);
-  //     if (!response.error) {
-  //       router.back()
-  //     }
-  //   }
-  //   else {
-  //      addToQueue({
-  //       method:"POST",
-  //       url:baseUrl+'/check-in',
-  //       body:payload,
-  //       id:getRandomId()
-  //      })
-  //       router.back()
+    const isConnected = await isInternetConnected();
 
-  //   }
-  //   addHistory(payload)
-  //   setResetTableId(table_id as string);
-  //   setLoader(false)
-  // }
+    if(isConnected) {
+      const response = await AddCheckIn(payload);
+      if (!response.error) {
+        router.back()
+      }
+    }
+    else {
+       addToQueue({
+        method:"POST",
+        url:baseUrl+'/check-in',
+        body:payload,
+        id:getRandomId()
+       })
+        router.back()
+
+    }
+    addHistory(payload as any)
+    setResetTableId(table._id as string);
+    setLoader(false)
+  }
   return (
     <View style={styles.container}>
       <View style={paramStyles.list}>
@@ -98,25 +124,14 @@ export default function Modal() {
         </View>
         <View style={paramStyles.row}>
           <Text style={paramStyles.key}>Games Played</Text>
-          <Text style={paramStyles.value}>{selected?.map((e, i) => (
-            <Text key={e} style={{ color: '#555', fontSize: 16 }}>
-              {e.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-              {i < selected.length - 1 ? ', ' : ''}
-            </Text>
-          ))}</Text>
+          <Text style={paramStyles.value}>
+            {formatted}
+          </Text>
         </View>
         <View style={paramStyles.row}>
           <Text style={paramStyles.key}>Rates</Text>
           <Text style={paramStyles.value}>
-            {selected
-              .filter(key => table[`${key}_rate`] !== undefined)
-              .map((key, idx) => {
-                const label = key
-                  .replace(/_/g, ' ')
-                  .replace(/\b\w/g, l => l.toUpperCase());
-                const rate = table[`${key}_rate`];
-                return `${label}: ${rate + ' Rs'}${idx < selected.filter(k => table[`${k}_rate`] !== undefined).length - 1 ? ', ' : ''}`;
-              })}
+            {rates}
           </Text>
         </View>
         <View style={paramStyles.row}>
@@ -136,7 +151,7 @@ export default function Modal() {
 
         <View style={paramStyles.row}>
           <Text style={paramStyles.key}>Grand Total</Text>
-          <Text style={paramStyles.value}>{String(totalBill)}</Text>
+          <Text style={paramStyles.value}>{String(totalBill)} Rs</Text>
         </View>
         <View style={paramStyles.row}>
           <Text style={paramStyles.key}>Customer Name *</Text>
@@ -180,7 +195,7 @@ export default function Modal() {
             }}
             disabled={loader}
           // onPress handler for save and print bill
-          // onPress={handleAddCheckIn}
+          onPress={handleAddCheckIn}
           >
             {loader ? <ActivityIndicator color={'#fefe'} /> : 'Save & Print Bill'}
           </Text>

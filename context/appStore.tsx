@@ -35,7 +35,8 @@ export interface History {
   received_amount: number;
   date: any;
   _id: string;
-  type:string;
+  types?:string;
+  frames?:string;
 }
 
 interface AppStore {

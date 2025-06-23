@@ -12,10 +12,10 @@ interface GamesModalProps {
     setStartSportWatch: React.Dispatch<SetStateAction<boolean>>;
     centuryTimer: number;
     setCenturyTimer: React.Dispatch<SetStateAction<number>>;
-    handleCheckOut:()=>void;
+    handleCheckOut: () => void;
 }
 
-export default function GamesModal({ visible, onClose, selectedGames, setSelectedGames, startStopWatch, setStartSportWatch, centuryTimer, setCenturyTimer,handleCheckOut }: GamesModalProps) {
+export default function GamesModal({ visible, onClose, selectedGames, setSelectedGames, startStopWatch, setStartSportWatch, centuryTimer, setCenturyTimer, handleCheckOut }: GamesModalProps) {
     // console.log(centuryTimer)
     return (
         <Modal visible={visible} transparent animationType="fade">
@@ -367,13 +367,13 @@ export default function GamesModal({ visible, onClose, selectedGames, setSelecte
                             </ScrollView>
                         </View>
                     </ScrollView>
-                    <View style={{display:"flex",flexDirection:'row'}}>
+                    <View style={{ display: "flex", flexDirection: 'row' }}>
                         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
                             <Text style={styles.buttonText}>Close</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.button} onPress={()=>{
-                            setSelectedGames({...selectedGames,century:centuryTimer})
+                        <TouchableOpacity style={styles.button} onPress={async () => {
+                            setStartSportWatch(false);
                             handleCheckOut()
                         }}>
                             <Text style={styles.buttonText}>View & Print Bill</Text>
@@ -445,8 +445,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingVertical: 12,
         alignItems: "center",
-        flex:1,
-        marginHorizontal:10
+        flex: 1,
+        marginHorizontal: 10
     },
 
     closeButton: {
@@ -455,8 +455,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingVertical: 12,
         alignItems: "center",
-        flex:1,
-        marginHorizontal:10
+        flex: 1,
+        marginHorizontal: 10
     },
     buttonText: {
         color: "#fff",
