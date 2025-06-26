@@ -23,264 +23,84 @@ export default function GamesModal({ visible, onClose, selectedGames, setSelecte
                 <View style={styles.modal}>
                     <Text style={styles.title}>Add Games</Text>
                     <ScrollView horizontal style={{ marginBottom: 10 }}>
-                        <View style={{
-                            position: "relative",
-                            top: 0, left: 0, right: 0, bottom: 0,
-                            //   backgroundColor: "rgba(0,0,0,0.5)",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            zIndex: 100,
-                        }}>
+                        <View
+                            style={{
+                                position: "relative",
+                                top: 0, left: 0, right: 0, bottom: 0,
+                                justifyContent: "center",
+                                alignItems: "center",
+                                zIndex: 100,
+                            }}
+                        >
                             <ScrollView contentContainerStyle={{ flex: 1, width: width * 0.85, justifyContent: "center" }}>
                                 <ScrollView contentContainerStyle={{ paddingVertical: 10 }}>
-                                    <View
-                                        style={{
-                                            flexDirection: "row",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                            backgroundColor: "#e3f2fd",
-                                            borderRadius: 10,
-                                            paddingVertical: 16,
-                                            paddingHorizontal: 20,
-                                            marginVertical: 8,
-                                            shadowColor: "#000",
-                                            shadowOpacity: 0.08,
-                                            shadowRadius: 4,
-                                            elevation: 2,
-                                        }}
-                                    >
-                                        <Text style={{ fontSize: 17, fontWeight: "600", color: "#222" }}>
-                                            One Red
-                                        </Text>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <TouchableOpacity
-                                                style={{
-                                                    backgroundColor: "#1976d2",
-                                                    borderRadius: 20,
-                                                    width: 36,
-                                                    height: 36,
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    marginRight: 10,
-                                                }}
-                                                onPress={() => {
-                                                    if (selectedGames.one_red === 0) return;
-                                                    setSelectedGames({ ...selectedGames, one_red: selectedGames.one_red - 1 })
-                                                }}
-                                            >
-                                                <Text style={{ color: "#fff", fontSize: 22 }}>-</Text>
-                                            </TouchableOpacity>
-                                            <Text style={{ fontSize: 19, fontWeight: "bold", minWidth: 28, textAlign: "center" }}>
-                                                {/* Replace 0 with actual counter value */}
-                                                {selectedGames.one_red}
+                                    {[
+                                        { key: "one_red", label: "One Red" },
+                                        { key: "six_red", label: "Six Red" },
+                                        { key: "ten_red", label: "Ten Red" },
+                                        { key: "fifteen_red", label: "Fiteen Red" },
+                                    ].map(({ key, label }) => (
+                                        <View
+                                            key={key}
+                                            style={{
+                                                flexDirection: "row",
+                                                alignItems: "center",
+                                                justifyContent: "space-between",
+                                                backgroundColor: "#e3f2fd",
+                                                borderRadius: 10,
+                                                paddingVertical: 16,
+                                                paddingHorizontal: 20,
+                                                marginVertical: 8,
+                                                shadowColor: "#000",
+                                                shadowOpacity: 0.08,
+                                                shadowRadius: 4,
+                                                elevation: 2,
+                                            }}
+                                        >
+                                            <Text style={{ fontSize: 17, fontWeight: "600", color: "#222" }}>
+                                                {label}
                                             </Text>
-                                            <TouchableOpacity
-                                                style={{
-                                                    backgroundColor: "#388e3c",
-                                                    borderRadius: 20,
-                                                    width: 36,
-                                                    height: 36,
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    marginLeft: 10,
-                                                }}
-                                                onPress={() => {
-                                                    // increment counter logic here
-                                                    setSelectedGames({ ...selectedGames, one_red: selectedGames.one_red + 1 })
-
-                                                }}
-                                            >
-                                                <Text style={{ color: "#fff", fontSize: 22 }}>+</Text>
-                                            </TouchableOpacity>
+                                            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                                <TouchableOpacity
+                                                    style={{
+                                                        backgroundColor: "#1976d2",
+                                                        borderRadius: 20,
+                                                        width: 36,
+                                                        height: 36,
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        marginRight: 10,
+                                                    }}
+                                                    onPress={() => {
+                                                        if (selectedGames[key] === 0) return;
+                                                        setSelectedGames({ ...selectedGames, [key]: selectedGames[key] - 1 });
+                                                    }}
+                                                >
+                                                    <Text style={{ color: "#fff", fontSize: 22 }}>-</Text>
+                                                </TouchableOpacity>
+                                                <Text style={{ fontSize: 19, fontWeight: "bold", minWidth: 28, textAlign: "center" }}>
+                                                    {selectedGames[key]}
+                                                </Text>
+                                                <TouchableOpacity
+                                                    style={{
+                                                        backgroundColor: "#388e3c",
+                                                        borderRadius: 20,
+                                                        width: 36,
+                                                        height: 36,
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        marginLeft: 10,
+                                                    }}
+                                                    onPress={() => {
+                                                        setSelectedGames({ ...selectedGames, [key]: selectedGames[key] + 1 });
+                                                    }}
+                                                >
+                                                    <Text style={{ color: "#fff", fontSize: 22 }}>+</Text>
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
-                                    </View>
-                                    <View
-                                        style={{
-                                            flexDirection: "row",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                            backgroundColor: "#e3f2fd",
-                                            borderRadius: 10,
-                                            paddingVertical: 16,
-                                            paddingHorizontal: 20,
-                                            marginVertical: 8,
-                                            shadowColor: "#000",
-                                            shadowOpacity: 0.08,
-                                            shadowRadius: 4,
-                                            elevation: 2,
-                                        }}
-                                    >
-                                        <Text style={{ fontSize: 17, fontWeight: "600", color: "#222" }}>
-                                            Six Red
-                                        </Text>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <TouchableOpacity
-                                                style={{
-                                                    backgroundColor: "#1976d2",
-                                                    borderRadius: 20,
-                                                    width: 36,
-                                                    height: 36,
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    marginRight: 10,
-                                                }}
-                                                onPress={() => {
-                                                    // decrement counter logic here
-                                                    if (selectedGames.six_red === 0) return;
-                                                    setSelectedGames({ ...selectedGames, six_red: selectedGames.six_red - 1 })
-
-                                                }}
-                                            >
-                                                <Text style={{ color: "#fff", fontSize: 22 }}>-</Text>
-                                            </TouchableOpacity>
-                                            <Text style={{ fontSize: 19, fontWeight: "bold", minWidth: 28, textAlign: "center" }}>
-                                                {/* Replace 0 with actual counter value */}
-                                                {selectedGames.six_red}
-                                            </Text>
-                                            <TouchableOpacity
-                                                style={{
-                                                    backgroundColor: "#388e3c",
-                                                    borderRadius: 20,
-                                                    width: 36,
-                                                    height: 36,
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    marginLeft: 10,
-                                                }}
-                                                onPress={() => {
-                                                    setSelectedGames({ ...selectedGames, six_red: selectedGames.six_red + 1 })
-                                                }}
-                                            >
-                                                <Text style={{ color: "#fff", fontSize: 22 }}>+</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                    <View
-                                        style={{
-                                            flexDirection: "row",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                            backgroundColor: "#e3f2fd",
-                                            borderRadius: 10,
-                                            paddingVertical: 16,
-                                            paddingHorizontal: 20,
-                                            marginVertical: 8,
-                                            shadowColor: "#000",
-                                            shadowOpacity: 0.08,
-                                            shadowRadius: 4,
-                                            elevation: 2,
-                                        }}
-                                    >
-                                        <Text style={{ fontSize: 17, fontWeight: "600", color: "#222" }}>
-                                            Ten Red
-                                        </Text>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <TouchableOpacity
-                                                style={{
-                                                    backgroundColor: "#1976d2",
-                                                    borderRadius: 20,
-                                                    width: 36,
-                                                    height: 36,
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    marginRight: 10,
-                                                }}
-                                                onPress={() => {
-                                                    // decrement counter logic here
-                                                    if (selectedGames.ten_red === 0) return;
-                                                    setSelectedGames({ ...selectedGames, ten_red: selectedGames.ten_red - 1 })
-
-                                                }}
-                                            >
-                                                <Text style={{ color: "#fff", fontSize: 22 }}>-</Text>
-                                            </TouchableOpacity>
-                                            <Text style={{ fontSize: 19, fontWeight: "bold", minWidth: 28, textAlign: "center" }}>
-                                                {/* Replace 0 with actual counter value */}
-                                                {selectedGames.ten_red}
-                                            </Text>
-                                            <TouchableOpacity
-                                                style={{
-                                                    backgroundColor: "#388e3c",
-                                                    borderRadius: 20,
-                                                    width: 36,
-                                                    height: 36,
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    marginLeft: 10,
-                                                }}
-                                                onPress={() => {
-                                                    // increment counter logic here
-                                                    setSelectedGames({ ...selectedGames, ten_red: selectedGames.ten_red + 1 })
-
-                                                }}
-                                            >
-                                                <Text style={{ color: "#fff", fontSize: 22 }}>+</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                    <View
-                                        style={{
-                                            flexDirection: "row",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                            backgroundColor: "#e3f2fd",
-                                            borderRadius: 10,
-                                            paddingVertical: 16,
-                                            paddingHorizontal: 20,
-                                            marginVertical: 8,
-                                            shadowColor: "#000",
-                                            shadowOpacity: 0.08,
-                                            shadowRadius: 4,
-                                            elevation: 2,
-                                        }}
-                                    >
-                                        <Text style={{ fontSize: 17, fontWeight: "600", color: "#222" }}>
-                                            Fiteen Red
-                                        </Text>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <TouchableOpacity
-                                                style={{
-                                                    backgroundColor: "#1976d2",
-                                                    borderRadius: 20,
-                                                    width: 36,
-                                                    height: 36,
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    marginRight: 10,
-                                                }}
-                                                onPress={() => {
-                                                    // decrement counter logic here
-                                                    if (selectedGames.fifteen_red === 0) return;
-                                                    setSelectedGames({ ...selectedGames, fifteen_red: selectedGames.fifteen_red - 1 })
-
-                                                }}
-                                            >
-                                                <Text style={{ color: "#fff", fontSize: 22 }}>-</Text>
-                                            </TouchableOpacity>
-                                            <Text style={{ fontSize: 19, fontWeight: "bold", minWidth: 28, textAlign: "center" }}>
-                                                {/* Replace 0 with actual counter value */}
-                                                {selectedGames.fifteen_red}
-                                            </Text>
-                                            <TouchableOpacity
-                                                style={{
-                                                    backgroundColor: "#388e3c",
-                                                    borderRadius: 20,
-                                                    width: 36,
-                                                    height: 36,
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    marginLeft: 10,
-                                                }}
-                                                onPress={() => {
-                                                    // increment counter logic here
-                                                    setSelectedGames({ ...selectedGames, fifteen_red: selectedGames.fifteen_red + 1 })
-
-                                                }}
-                                            >
-                                                <Text style={{ color: "#fff", fontSize: 22 }}>+</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
+                                    ))}
+                                    {/* Century Timer Row */}
                                     <View
                                         style={{
                                             flexDirection: "row",
@@ -321,7 +141,7 @@ export default function GamesModal({ visible, onClose, selectedGames, setSelecte
                                                 </Text>
                                             </TouchableOpacity>
                                             <Text style={{ fontSize: 19, fontWeight: "bold", minWidth: 28, textAlign: "center" }}>
-                                                {String(centuryTimer)} Seconds
+                                                {`${String(Math.floor(centuryTimer / 60)).padStart(2, '0')}:${String(centuryTimer % 60).padStart(2, '0')}`}
                                             </Text>
                                             <TouchableOpacity
                                                 style={{
@@ -362,7 +182,6 @@ export default function GamesModal({ visible, onClose, selectedGames, setSelecte
                                             </TouchableOpacity>
                                         </View>
                                     </View>
-
                                 </ScrollView>
                             </ScrollView>
                         </View>

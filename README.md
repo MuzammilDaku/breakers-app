@@ -37,6 +37,12 @@ cd android &&  ./gradlew assembleRelease
 ```
 📦 APK will be generated in android/app/build/outputs/apk/release/
 
+## Development Build
+```sh
+eas build --platform android --profile development
+```
+
+
 ## Author
 
 👤 **Muzammil Abbas**
