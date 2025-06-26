@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const baseUrl = "https://eeca-2400-adc7-907-6400-a56-6efd-6f29-7ecf.ngrok-free.app/api"; 
+export const baseUrl = "https://breakers-api.vercel.app/api"; 
 
 const Api = axios.create({
     baseURL: baseUrl, 
