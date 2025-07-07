@@ -40,6 +40,17 @@ export default function RootLayout() {
               </TouchableOpacity>
             ) : null,
         }} />
+        <Stack.Screen name="match-tracker" options={{
+          title: "Match Tracker", headerLeft: () =>
+            navigation.canGoBack() ? (
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+              style={{ marginLeft: 10, marginRight: -10 }}
+              >
+                <Ionicons name="arrow-back" size={20} />
+              </TouchableOpacity>
+            ) : null,
+        }} />
 
 
         <Stack.Screen name="+not-found" />
