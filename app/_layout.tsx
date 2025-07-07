@@ -1,13 +1,17 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useNavigation } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { Ionicons } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const navigation = useNavigation();
+
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -18,23 +22,36 @@ export default function RootLayout() {
   }
 
 
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name='auth/login' options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="create-table" options={{ presentation:'modal',title:"Create Table"}} />
+      <Stack>
+        <Stack.Screen name='auth/login' options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="create-table" options={{ presentation: 'modal', title: "Create Table" }} />
+        <Stack.Screen name="assign-players" options={{
+          title: "Assign Players", headerLeft: () =>
+            navigation.canGoBack() ? (
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+              style={{ marginLeft: 10, marginRight: -10 }}
+              >
+                <Ionicons name="arrow-back" size={20} />
+              </TouchableOpacity>
+            ) : null,
+        }} />
 
-          <Stack.Screen name="+not-found" />
-          <Stack.Screen
-            name="modal"
-            options={{
-              presentation: 'modal',
-              title: "View & Print Bill"
-            }}
-          />
-          
-        </Stack>
+
+        <Stack.Screen name="+not-found" />
+        <Stack.Screen
+          name="modal"
+          options={{
+            presentation: 'modal',
+            title: "View & Print Bill"
+          }}
+        />
+
+      </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
   );

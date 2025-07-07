@@ -1,4 +1,4 @@
-import GetTablesComp from "@/components/GetTables";
+import TablesComp from "@/components/New/NewTablesComp";
 import { useAppStore } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
 import { isInternetConnected } from "@/services/utilities/isInternetConnected";
@@ -8,7 +8,8 @@ import { useEffect, useRef } from "react";
 
 export default function HomeScreen() {
   const { user } = useAppStore();
-  const { syncQueue,syncing } = useOfflineStore()
+  const { syncQueue, syncing } = useOfflineStore();
+
   useEffect(() => {
     if (!user) {
       router.navigate("/auth/login")
@@ -21,7 +22,7 @@ export default function HomeScreen() {
     const pollAndSync = async () => {
       const isConnected = await isInternetConnected()
       if (isConnected && !syncing) {
-        console.log("⏳ Syncing queued items...");
+        // console.log("⏳ Syncing queued items...");
         await syncQueue();
       }
     };
@@ -34,7 +35,7 @@ export default function HomeScreen() {
   }, []);
   return (
     <>
-    <GetTablesComp />
+      <TablesComp />
     </>
   );
 }

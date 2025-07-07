@@ -34,13 +34,13 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
 
     const handleCheckOut = async () => {
         // setRunning(false)   
-        setShowGameModal(false);     
+        setShowGameModal(false);
         router.navigate({
             pathname: '/modal',
             params: {
-                table:JSON.stringify(table),
-                selectedGames:JSON.stringify(selectedGames),
-                centuryTimer:String(centuryTimer)
+                table: JSON.stringify(table),
+                selectedGames: JSON.stringify(selectedGames),
+                centuryTimer: String(centuryTimer)
             }
         });
     }
@@ -105,7 +105,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
         fifteen_red: 0,
         century: 0
     })
-    
+
 
     const [startStopWatch, setStartSportWatch] = useState(false);
 
@@ -137,7 +137,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ table }) => {
             {selectedGame && <Text style={styles.rate}>{selectedGameText()}</Text>}
             <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                 <HistoryModal visible={showModal} onClose={onCloseModal} history={Array.isArray(history) ? history.filter((e: any) => e.table_id === table._id) : []} />
-                <GamesModal visible={showGameModal} onClose={onCloseGameModal} selectedGames={selectedGames} setSelectedGames={setSelectedGames} startStopWatch={startStopWatch} setStartSportWatch={setStartSportWatch} centuryTimer={centuryTimer} setCenturyTimer={setCenturyTimer} handleCheckOut={handleCheckOut}/>
+                <GamesModal visible={showGameModal} onClose={onCloseGameModal} selectedGames={selectedGames} setSelectedGames={setSelectedGames} startStopWatch={startStopWatch} setStartSportWatch={setStartSportWatch} centuryTimer={centuryTimer} setCenturyTimer={setCenturyTimer} handleCheckOut={handleCheckOut} />
                 {Array.isArray(history) && history.some((e: any) => e.table_id === table._id) && (
                     <TouchableOpacity
                         onPress={() => {

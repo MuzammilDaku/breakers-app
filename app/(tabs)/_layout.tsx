@@ -2,7 +2,7 @@ import { Tabs, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 
 import { useAppStore } from '@/context/appStore';
-import { MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function TabLayout() {
@@ -30,22 +30,31 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-      headerShown: false
+      // headerShown: false
+      
       }}
     >
       <Tabs.Screen
       name="index"
       options={{
-        title: 'Home',
-        tabBarIcon: ({ color }) => <MaterialIcons name='home-filled' color={color} size={28}/> ,
+        title: 'Billing',
+        tabBarIcon: ({ color }) => <FontAwesome6 name="money-bill" size={24} color={color} /> ,
       }}
       />
-
+{/* 
       <Tabs.Screen
+      name="player"
+      options={{
+        title: 'Players',
+        tabBarIcon: ({ color }) => <Entypo name="users" size={28} color={color} />,
+      }}
+      /> */}
+
+         <Tabs.Screen
       name="dashboard"
       options={{
         title: 'Dashboard',
-        tabBarIcon: ({ color }) => <MaterialCommunityIcons name="view-dashboard" size={28} color={color} />,
+        tabBarIcon: ({ color }) => <MaterialCommunityIcons name="view-dashboard-outline" size={24} color={color} />,
       }}
       />
     </Tabs>

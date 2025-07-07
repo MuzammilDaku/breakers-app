@@ -20,7 +20,7 @@ export interface Table {
   century_rate: Number;
   one_red_rate: Number
   fifteen_red_rate:Number;
-  _id?:string;
+  _id:string;
   date?:Date
 }
 

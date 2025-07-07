@@ -16,7 +16,7 @@ interface GamesModalProps {
 }
 
 export default function GamesModal({ visible, onClose, selectedGames, setSelectedGames, startStopWatch, setStartSportWatch, centuryTimer, setCenturyTimer, handleCheckOut }: GamesModalProps) {
-    // console.log(centuryTimer)
+    // console.log( )
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.overlay}>
