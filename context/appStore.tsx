@@ -39,6 +39,18 @@ export interface History {
   frames?:string;
 }
 
+interface InUseTable {
+  table:Table;
+  _id:string;
+  player_name1:string;
+  player_name2?:string;  
+  player_name3?:string; 
+  player_name4?:string;
+  game_type:string;
+  game_mode:string;
+  friendly_match:boolean;
+}
+
 interface AppStore {
   user: User | null;
   setUser: (user: User | null) => void;
@@ -56,6 +68,10 @@ interface AppStore {
 
   history: History[];
   setHistory: (history: History[]) => void;
+   
+  inUseTables:InUseTable[];
+  setInUseTables:(table:InUseTable)=>void;
+  
 }
 
 export const useAppStore = create<AppStore>()(
@@ -85,6 +101,10 @@ export const useAppStore = create<AppStore>()(
       deleteTable:(table:Table) => {
         set({ tables: get().tables.filter((item) => item._id !== table._id) });
         // set({})
+      },
+      inUseTables:[],
+      setInUseTables:(table:InUseTable)=>{
+        set({inUseTables:[...get().inUseTables || [],table]})
       }
     }),
     {

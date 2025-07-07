@@ -1,66 +1,104 @@
+import { useAppStore } from '@/context/appStore';
+import { getRandomId } from '@/services/utilities/getRandomId';
 import Checkbox from 'expo-checkbox';
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 export default function Assign() {
+    const params = useLocalSearchParams();
+    const { tables } = useAppStore()
+    const { table_id } = params;
+    // console.log(table_id)
+    const table = tables.filter((item) => item._id == table_id)[0];
+    // console.log(table)
+    const { setInUseTables } = useAppStore();
     const [matchInfo, setMatchInfo] = useState({
-        player_name: '',
-        matchType: '1 v 1',
-        price_frame: '',
-        game_type: 'One Red'
-    })
-    const [isChecked, setChecked] = useState(true);
+        player_name1: '',
+        player_name2: "",
+        player_name3: "",
+        player_name4: "",
+        game_mode: '1 v 1',
+        game_type: 'One Red',
+        friendly_match: true,
+        table,
+        _id: getRandomId()
+    });
 
-    const [isDisabled,setIsDisabled] = useState(true)
+    const [isChecked, setChecked] = useState(true);
+    const [isDisabled, setIsDisabled] = useState(true);
+
+    const handleChange = (field: string, value: string | boolean) => {
+        setMatchInfo({ ...matchInfo, [field]: value })
+
+    }
+
+    useEffect(() => {
+        if (matchInfo.game_mode == '1 v 1' && matchInfo.friendly_match) {
+            if (matchInfo.player_name1) {
+                setIsDisabled(false)
+            }
+            else {
+                setIsDisabled(true)
+            }
+        }
+    }, [matchInfo]);
+
+    const handleClick = () => {
+        setInUseTables(matchInfo)
+    };
+
     return (
         <View style={styles.conatiner}>
             <View style={{ marginHorizontal: 25 }}>
                 <View style={styles.inputContainer}>
                     <Text style={styles.inputLabel}>Player 1 Name *</Text>
-                    <TextInput placeholder="Enter Player Name" style={styles.input} />
+                    <TextInput placeholder="Enter Player Name" style={styles.input} value={matchInfo.player_name1} onChangeText={(e) => handleChange("player_name1", e)} />
                 </View>
-                {matchInfo.matchType == "1 v 1" && !isChecked && (
+                {matchInfo.game_mode == "1 v 1" && !isChecked && (
                     <View style={styles.inputContainer}>
                         <Text style={styles.inputLabel}>Player 2 Name </Text>
-                        <TextInput placeholder="Enter Player Name" style={styles.input} />
+                        <TextInput placeholder="Enter Player Name" style={styles.input} value={matchInfo.player_name2} onChangeText={(e) => handleChange("player_name2", e)} />
                     </View>
                 )}
-                  {matchInfo.matchType == "2 v 2" && isChecked && (
+                {matchInfo.game_mode == "2 v 2" && isChecked && (
                     <View style={styles.inputContainer}>
                         <Text style={styles.inputLabel}>Player 2 Name </Text>
-                        <TextInput placeholder="Enter Player Name" style={styles.input} />
+                        <TextInput placeholder="Enter Player Name" style={styles.input} value={matchInfo.player_name2} onChangeText={(e) => handleChange("player_name2", e)} />
                     </View>
                 )}
-                {matchInfo.matchType == "2 v 2" && !isChecked && (
+                {matchInfo.game_mode == "2 v 2" && !isChecked && (
                     <>
                         <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>Player 2 Name </Text>
-                            <TextInput placeholder="Enter Player Name" style={styles.input} />
+                            <TextInput placeholder="Enter Player Name" style={styles.input} value={matchInfo.player_name2} onChangeText={(e) => handleChange("player_name2", e)} />
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>Player 3 Name </Text>
-                            <TextInput placeholder="Enter Player Name" style={styles.input} />
+                            <TextInput placeholder="Enter Player Name" style={styles.input} value={matchInfo.player_name3} onChangeText={(e) => handleChange("player_name3", e)} />
                         </View>
                         <View style={styles.inputContainer}>
                             <Text style={styles.inputLabel}>Player 4 Name </Text>
-                            <TextInput placeholder="Enter Player Name" style={styles.input} />
+                            <TextInput placeholder="Enter Player Name" style={styles.input} value={matchInfo.player_name4} onChangeText={(e) => handleChange("player_name4", e)} />
                         </View>
                     </>
 
                 )}
                 <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 13 }}>
                     {/* <Text style={styles.inputLabel}></Text> */}
-                    <Checkbox value={isChecked} color={'#475ba3'} onValueChange={setChecked} />
+                    <Checkbox value={isChecked} color={'#475ba3'} onValueChange={(e) => {
+                        setChecked(e);
+                        handleChange('friendly_match', e)
+                    }} />
                     <Text style={{ fontSize: 16, marginLeft: 8 }}>Friendly Match</Text>
                 </View>
 
                 <View style={{ marginTop: 15 }}>
                     <Text style={styles.inputLabel}>Mode</Text>
                     <View style={styles.tabContainer}>
-                        <TouchableOpacity style={[styles.pill, matchInfo.matchType === '1 v 1' && styles.pillSelected]} onPress={() => setMatchInfo({ ...matchInfo, matchType: '1 v 1' })}>
+                        <TouchableOpacity style={[styles.pill, matchInfo.game_mode === '1 v 1' && styles.pillSelected]} onPress={() => setMatchInfo({ ...matchInfo, game_mode: '1 v 1' })}>
                             <Text style={styles.pillText}>1 v 1</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.pill, matchInfo.matchType === '2 v 2' && styles.pillSelected]} onPress={() => { setMatchInfo({ ...matchInfo, matchType: '2 v 2' }) }}>
+                        <TouchableOpacity style={[styles.pill, matchInfo.game_mode === '2 v 2' && styles.pillSelected]} onPress={() => { setMatchInfo({ ...matchInfo, game_mode: '2 v 2' }) }}>
                             <Text style={styles.pillText}>2 v 2</Text>
                         </TouchableOpacity>
                     </View>
@@ -87,7 +125,7 @@ export default function Assign() {
                     </View>
                 </View>
 
-                <View style={[isDisabled ? styles.btnDisabled:styles.btn]}>
+                <View style={[isDisabled ? styles.btnDisabled : styles.btn]}>
                     <TouchableOpacity onPress={() => router.navigate('/match-tracker')} disabled={isDisabled}>
                         <Text style={{ textAlign: "center", color: "#fefefe", fontSize: 16 }}>Start Match</Text>
                     </TouchableOpacity>
@@ -160,7 +198,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#475ba3'
     },
-      btnDisabled: {
+    btnDisabled: {
         marginVertical: 15,
         height: 50,
         // textAlign:"center",

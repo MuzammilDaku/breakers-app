@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Tables(props: { selectedFilter: string }) {
-    const { tables, setTables, user } = useAppStore();
+    const { tables, setTables, user ,inUseTables} = useAppStore();
     const { queue, hasLoaded } = useOfflineStore()
     useEffect(() => {
         async function fetchTables() {
@@ -25,26 +25,26 @@ export default function Tables(props: { selectedFilter: string }) {
         }
     }, [hasLoaded, user])
     return (
-            <View style={styles.container}>
-                <FlatList
-                    data={tables}
-                    keyExtractor={item => item._id}
-                    renderItem={({ item }) => {
-                        return (
-                            <TouchableOpacity style={styles.row} onPress={()=>router.navigate("/assign-players")}>
-                                <View>
-                                    <Text style={styles.rowText}>
-                                        {item.name}
-                                    </Text>
-                                </View>
-                                <View style={styles.btn}>
-                                    <Text style={styles.btnText}>Free</Text>
-                                </View>
-                            </TouchableOpacity>
-                        )
-                    }}
-                />
-            </View>
+        <View style={styles.container}>
+            <FlatList
+                data={tables}
+                keyExtractor={item => item._id}
+                renderItem={({ item }) => {
+                    return (
+                        <TouchableOpacity style={styles.row} onPress={() => router.navigate({pathname:"/assign-players",params:{table_id:item._id}})}>
+                            <View>
+                                <Text style={styles.rowText}>
+                                    {item.name}
+                                </Text>
+                            </View>
+                            <View style={styles.btn}>
+                                <Text style={styles.btnText}>Free</Text>
+                            </View>
+                        </TouchableOpacity>
+                    )
+                }}
+            />
+        </View>
     )
 }
 
