@@ -1,4 +1,4 @@
-import { useAppStore } from "@/context/appStore";
+import { Table, useAppStore } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
 import { GetTables } from "@/services/table";
 import { router } from "expo-router";
@@ -6,8 +6,16 @@ import { useEffect } from "react";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Tables(props: { selectedFilter: string }) {
-    const { tables, setTables, user ,inUseTables} = useAppStore();
-    const { queue, hasLoaded } = useOfflineStore()
+    // const { tables, setTables, user, inUseTables } = useAppStore();
+    const tables = useAppStore((state) => state.tables);
+    const setTables = useAppStore((state) => state.setTables);
+    const user = useAppStore((state) => state.user);
+    const inUseTables = useAppStore((state) => state.inUseTables);
+
+
+    const queue = useOfflineStore((state) => state.queue)
+    const hasLoaded = useOfflineStore((state) => state.hasLoaded)
+
     useEffect(() => {
         async function fetchTables() {
             try {
@@ -23,7 +31,23 @@ export default function Tables(props: { selectedFilter: string }) {
         if (hasLoaded && queue.length === 0) {
             fetchTables();
         }
-    }, [hasLoaded, user])
+    }, [hasLoaded, user]);
+
+    const gameModeCheck = (table: Table) => {
+        const data = inUseTables.filter(
+            (inUseTable) => String(inUseTable.table._id) === String(table._id)
+        );
+
+        if (data.length > 0) {
+            const isFriendly = data.some((inUseTable) => inUseTable.friendly_match);
+            return isFriendly ? "Friendly Match" : "In Use";
+        }
+
+        return "Free";
+    };
+
+
+
     return (
         <View style={styles.container}>
             <FlatList
@@ -31,15 +55,29 @@ export default function Tables(props: { selectedFilter: string }) {
                 keyExtractor={item => item._id}
                 renderItem={({ item }) => {
                     return (
-                        <TouchableOpacity style={styles.row} onPress={() => router.navigate({pathname:"/assign-players",params:{table_id:item._id}})}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                const status = gameModeCheck(item);
+                                const route = status === "Free" ? "/assign-players" : "/match-tracker";
+                                router.push({ pathname: route, params: { table_id: item._id } });
+                            }}
+                            style={styles.row}
+                        >
                             <View>
                                 <Text style={styles.rowText}>
                                     {item.name}
                                 </Text>
                             </View>
-                            <View style={styles.btn}>
-                                <Text style={styles.btnText}>Free</Text>
-                            </View>
+                            {gameModeCheck(item) == "In Use" || gameModeCheck(item) == "Friendly Match" ? (
+                                <View style={styles.btnUse}>
+                                    <Text style={styles.btnUseText}>{gameModeCheck(item)}</Text>
+                                </View>
+                            ) :
+
+                                <View style={styles.btn}>
+                                    <Text style={styles.btnText}>Free</Text>
+                                </View>
+                            }
                         </TouchableOpacity>
                     )
                 }}

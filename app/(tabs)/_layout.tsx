@@ -29,10 +29,6 @@ export default function TabLayout() {
   }, []);
   return (
     <Tabs
-      screenOptions={{
-      // headerShown: false
-      
-      }}
     >
       <Tabs.Screen
       name="index"
@@ -41,14 +37,6 @@ export default function TabLayout() {
         tabBarIcon: ({ color }) => <FontAwesome6 name="money-bill" size={24} color={color} /> ,
       }}
       />
-{/* 
-      <Tabs.Screen
-      name="player"
-      options={{
-        title: 'Players',
-        tabBarIcon: ({ color }) => <Entypo name="users" size={28} color={color} />,
-      }}
-      /> */}
 
          <Tabs.Screen
       name="dashboard"

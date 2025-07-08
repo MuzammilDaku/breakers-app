@@ -3,15 +3,14 @@ import { getRandomId } from '@/services/utilities/getRandomId';
 import Checkbox from 'expo-checkbox';
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from "react-native";
 export default function Assign() {
     const params = useLocalSearchParams();
-    const { tables } = useAppStore()
+    const tables = useAppStore((state)=>state.tables);
+    const setInUseTables = useAppStore((state)=>state.setInUseTables)
     const { table_id } = params;
-    // console.log(table_id)
     const table = tables.filter((item) => item._id == table_id)[0];
-    // console.log(table)
-    const { setInUseTables } = useAppStore();
+    const [isChecked, setChecked] = useState(true);
     const [matchInfo, setMatchInfo] = useState({
         player_name1: '',
         player_name2: "",
@@ -24,13 +23,13 @@ export default function Assign() {
         _id: getRandomId()
     });
 
-    const [isChecked, setChecked] = useState(true);
     const [isDisabled, setIsDisabled] = useState(true);
 
     const handleChange = (field: string, value: string | boolean) => {
         setMatchInfo({ ...matchInfo, [field]: value })
 
     }
+ 
 
     useEffect(() => {
         if (matchInfo.game_mode == '1 v 1' && matchInfo.friendly_match) {
@@ -41,10 +40,49 @@ export default function Assign() {
                 setIsDisabled(true)
             }
         }
+        if(matchInfo.game_mode == '1 v 1' && !matchInfo.friendly_match) {
+            if (matchInfo.player_name1 && matchInfo.player_name2) {
+                setIsDisabled(false)
+            }
+            else {
+                setIsDisabled(true)
+            }
+        }
+        if (matchInfo.game_mode == '2 v 2' && matchInfo.friendly_match) {
+            if (matchInfo.player_name1 && matchInfo.player_name2) {
+                setIsDisabled(false)
+            }
+            else {
+                setIsDisabled(true)
+            }
+        }
+        if (matchInfo.game_mode == '2 v 2' && !matchInfo.friendly_match) {
+            if (matchInfo.player_name1 && matchInfo.player_name2 && matchInfo.player_name3 && matchInfo.player_name4) {
+                setIsDisabled(false)
+            }
+            else {
+                setIsDisabled(true)
+            }
+        }
+        // console.log(isDisabled)
     }, [matchInfo]);
 
     const handleClick = () => {
         setInUseTables(matchInfo)
+        ToastAndroid.showWithGravity("Match Started", ToastAndroid.SHORT, ToastAndroid.TOP);
+        setMatchInfo({
+            player_name1: '',
+            player_name2: "",
+            player_name3: "",
+            player_name4: "",
+            game_mode: '1 v 1',
+            game_type: 'One Red',
+            friendly_match: true,
+            table,
+            _id: getRandomId()
+        })
+       return router.navigate('/(tabs)');
+
     };
 
     return (
@@ -87,7 +125,7 @@ export default function Assign() {
                     {/* <Text style={styles.inputLabel}></Text> */}
                     <Checkbox value={isChecked} color={'#475ba3'} onValueChange={(e) => {
                         setChecked(e);
-                        handleChange('friendly_match', e)
+                        handleChange("friendly_match", e);
                     }} />
                     <Text style={{ fontSize: 16, marginLeft: 8 }}>Friendly Match</Text>
                 </View>
@@ -126,7 +164,7 @@ export default function Assign() {
                 </View>
 
                 <View style={[isDisabled ? styles.btnDisabled : styles.btn]}>
-                    <TouchableOpacity onPress={() => router.navigate('/match-tracker')} disabled={isDisabled}>
+                    <TouchableOpacity onPress={handleClick} disabled={isDisabled}>
                         <Text style={{ textAlign: "center", color: "#fefefe", fontSize: 16 }}>Start Match</Text>
                     </TouchableOpacity>
                 </View>
