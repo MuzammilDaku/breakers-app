@@ -55,17 +55,22 @@ interface InUseTable {
 
 interface UserBillTable {
   _id: string;
-  table: Table;
   inUseTable: InUseTable;
   winner: string;
   loser: string;
-  total_bill: number |  undefined;
+  total_bill: number | undefined;
   total_frame?: number;
   total_time?: number;
   total_bill_per_frame?: number;
   total_bill_per_minute?: number;
-  date?:Date;
-  game_type:string;
+  date?: string;
+  game_type: string;
+  status?: string;
+}
+
+interface Customer {
+  name: string;
+  date: string;
 }
 
 interface AppStore {
@@ -88,10 +93,15 @@ interface AppStore {
 
   inUseTables: InUseTable[];
   setInUseTables: (table: InUseTable) => void;
+  deleteInUseTable: (table: InUseTable) => void;
+
 
   billTables: UserBillTable[];
   setBillTables: (table: UserBillTable) => void;
 
+  customers: Customer[];
+  setCustomers: (customers: Customer) => void;
+  addPaidStatus:(ids:string[])=>void;
 }
 
 export const useAppStore = create<AppStore>()(
@@ -127,15 +137,33 @@ export const useAppStore = create<AppStore>()(
       },
       billTables: [],
       setBillTables(table: UserBillTable) {
-        set({ billTables: [...(get().billTables || []), { ...table, date: new Date() }] });
+        set({ billTables: [...(get().billTables || []), { ...table, date: getCurrentPakistaniTime() }] });
       },
+      customers: [],
+      setCustomers: (customer: Customer) => {
+        const customers = get().customers || [];
+        if (customers.some(c => c.name === customer.name)) {
+          set({ customers });
+        } else {
+          set({ customers: [...customers, customer] });
+        }
+      },
+      deleteInUseTable: (table: InUseTable) => {
+        set({ inUseTables: get().inUseTables.filter((item) => item._id !== table._id) });
+      },
+      addPaidStatus:(ids)=>{
+        
+        const updatedBillTables = get().billTables.map(bill =>
+          ids.includes(bill._id) ? { ...bill, status: 'paid' } : bill
+        );
+        set({ billTables: updatedBillTables });
+      }
     }),
 
     {
-      name: 'app-store', // key in AsyncStorage
+      name: 'app-store',
       storage: {
         getItem: async (name) => {
-          // zustand persist expects a StorageValue or null
           const value = await AsyncStorage.getItem(name);
           return value ? JSON.parse(value) : null;
         },

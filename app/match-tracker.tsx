@@ -1,10 +1,11 @@
 import { useAppStore } from "@/context/appStore";
 import { getCurrentPakistaniTime } from "@/services/utilities/getPakistaniTime";
+import { getRandomId } from "@/services/utilities/getRandomId";
 import { MaterialIcons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
     Keyboard,
@@ -20,24 +21,26 @@ export default function MatchTracker() {
     const inUseTables = useAppStore((state) => state.inUseTables);
     const tables = useAppStore((state) => state.tables);
     const setBillTables = useAppStore((state) => state.setBillTables);
+    const deleteInUseTable = useAppStore((state) => state.deleteInUseTable);
+
     const params = useLocalSearchParams();
     const { table_id } = params;
 
-    const inUseTable = inUseTables.filter((item) => item.table._id === table_id)[0];
-    const table = tables.filter((item) => item._id === table_id)[0];
+    const inUseTable = inUseTables?.filter((item) => item.table._id === table_id)[0];
+    const table = tables?.filter((item) => item._id === table_id)[0];
 
     const players: string[] = [];
-    if (inUseTable.player_name1) players.push(inUseTable.player_name1);
+    if (inUseTable?.player_name1) players.push(inUseTable?.player_name1);
     if (
-        (inUseTable.game_mode === "2 v 2" && inUseTable.friendly_match) ||
-        (inUseTable.game_mode === "1 v 1" && !inUseTable.friendly_match) ||
-        (inUseTable.game_mode === "2 v 2" && !inUseTable.friendly_match)
+        (inUseTable?.game_mode === "2 v 2" && inUseTable?.friendly_match) ||
+        (inUseTable?.game_mode === "1 v 1" && !inUseTable?.friendly_match) ||
+        (inUseTable?.game_mode === "2 v 2" && !inUseTable?.friendly_match)
     ) {
-        if (inUseTable.player_name2) players.push(inUseTable.player_name2);
+        if (inUseTable?.player_name2) players.push(inUseTable?.player_name2);
     }
-    if (inUseTable.game_mode === "2 v 2" && !inUseTable.friendly_match) {
-        if (inUseTable.player_name3) players.push(inUseTable.player_name3);
-        if (inUseTable.player_name4) players.push(inUseTable.player_name4);
+    if (inUseTable?.game_mode === "2 v 2" && !inUseTable?.friendly_match) {
+        if (inUseTable?.player_name3) players.push(inUseTable?.player_name3);
+        if (inUseTable?.player_name4) players.push(inUseTable?.player_name4);
     }
 
     const [winner, setWinner] = useState("");
@@ -47,19 +50,19 @@ export default function MatchTracker() {
     const [showWinnerDropdown, setShowWinnerDropdown] = useState(false);
     const [showLoserDropdown, setShowLoserDropdown] = useState(false);
 
-    const winnerOptions = players.filter(
-        (p) => p.toLowerCase().includes(winnerSearch.toLowerCase()) && p !== loser
+    const winnerOptions = players?.filter(
+        (p) => p?.toLowerCase()?.includes(winnerSearch.toLowerCase()) && p !== loser
     );
-    const loserOptions = players.filter(
-        (p) => p.toLowerCase().includes(loserSearch.toLowerCase()) && p !== winner
+    const loserOptions = players?.filter(
+        (p) => p?.toLowerCase()?.includes(loserSearch.toLowerCase()) && p !== winner
     );
 
     const renderDropdown = (options: string[], onSelect: (p: string) => void) => {
-        if (options.length === 0) return null;
+        if (options?.length === 0) return null;
 
         return (
             <View style={styles.dropdown}>
-                {options.map((p) => (
+                {options?.map((p) => (
                     <TouchableOpacity key={p} onPress={() => onSelect(p)}>
                         <Text style={styles.dropdownItem}>{p}</Text>
                     </TouchableOpacity>
@@ -70,68 +73,72 @@ export default function MatchTracker() {
 
     const [elapsedTime, setElapsedTime] = useState(0);
     const [timerRunning, setTimerRunning] = useState(true);
-    const [frames,setFrames] = useState(1);
+    const [frames, setFrames] = useState(1);
 
     const totalBill = () => {
-        if (inUseTable.game_type === "Century" && table.century_rate) {
-            return Math.round(Number(table.century_rate) * elapsedTime / 60);
+        if (inUseTable?.game_type === "Century" && table?.century_rate) {
+            return Math.round(Number(table?.century_rate) * elapsedTime / 60);
         }
-        if (inUseTable.game_type === "One Red" && table.one_red_rate) {
-            return Math.round(Number(table.one_red_rate) * frames);
+        if (inUseTable?.game_type === "One Red" && table?.one_red_rate) {
+            return Math?.round(Number(table?.one_red_rate));
         }
-        if (inUseTable.game_type === "Six Red" && table.six_red_rate) {
-            return Math.round(Number(table.six_red_rate)* frames);
+        if (inUseTable?.game_type === "Six Red" && table?.six_red_rate) {
+            return Math.round(Number(table?.six_red_rate));
         }
-        if (inUseTable.game_type === "Ten Red" && table.ten_red_rate) {
-            return Math.round(Number(table.ten_red_rate)* frames);
+        if (inUseTable?.game_type === "Ten Red" && table?.ten_red_rate) {
+            return Math.round(Number(table?.ten_red_rate));
         }
-        if (inUseTable.game_type === "Fifteen Red" && table.fifteen_red_rate) {
-            return Math.round(Number(table.fifteen_red_rate)* frames);
+        if (inUseTable?.game_type === "Fifteen Red" && table?.fifteen_red_rate) {
+            return Math.round(Number(table?.fifteen_red_rate));
         }
     };
 
     const handleEndGame = () => {
-        // setBillTables({
-        //     _id: getRandomId(),
-        //     table: table,
-        //     inUseTable: inUseTable,
-        //     winner: winner,
-        //     loser: loser,
-        //     total_bill: totalBill(),
-        //     total_frame: frames,
-        //     total_time: elapsedTime,
-        //     game_type: inUseTable.game_type,
-        //     date: new Date(),
-        // })
-        console.log(totalBill());
+        setTimerRunning(false);
+        setBillTables({
+            _id: getRandomId(),
+            inUseTable: inUseTable,
+            winner: winner,
+            loser: loser,
+            total_bill: totalBill(),
+            total_frame: frames,
+            total_time: elapsedTime,
+            game_type: inUseTable.game_type,
+        });
+        router.navigate({pathname:"/billing",params:{
+            customer_name:loser
+        }})
+        deleteInUseTable(inUseTable);
+        setTimerRunning(true);
+        // console.log(totalBill());
     };
 
 
 
 
-   dayjs.extend(utc);
-dayjs.extend(timezone);
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
 
-useEffect(() => {
-  if (
-    inUseTable?.game_type === "Century" &&
-    inUseTable?.date &&
-    timerRunning
-  ) {
-    const updateTimer = () => {
-      const start = dayjs.tz(inUseTable.date, 'YYYY-MM-DD HH:mm:ss', 'Asia/Karachi');
-      const now = dayjs.tz(getCurrentPakistaniTime(), 'YYYY-MM-DD HH:mm:ss', 'Asia/Karachi');
+    useEffect(() => {
+        if (
+            inUseTable?.game_type === "Century" &&
+            inUseTable?.date &&
+            timerRunning
+        ) {
+            const updateTimer = () => {
+                const start = dayjs.tz(inUseTable.date, 'YYYY-MM-DD HH:mm:ss', 'Asia/Karachi');
+                const now = dayjs.tz(getCurrentPakistaniTime(), 'YYYY-MM-DD HH:mm:ss', 'Asia/Karachi');
 
-      const secondsElapsed = now.diff(start, 'second'); // ✅ Accurate
-      setElapsedTime(secondsElapsed);
-    };
+                const secondsElapsed = now.diff(start, 'second'); // ✅ Accurate
+                setElapsedTime(secondsElapsed);
+            };
 
-    updateTimer(); // First run
-    const interval = setInterval(updateTimer, 1000);
+            updateTimer(); // First run
+            const interval = setInterval(updateTimer, 1000);
 
-    return () => clearInterval(interval);
-  }
-}, [inUseTable, timerRunning]);
+            return () => clearInterval(interval);
+        }
+    }, [inUseTable, timerRunning]);
 
     const hours = Math.floor(elapsedTime / 3600)
         .toString()
@@ -141,8 +148,6 @@ useEffect(() => {
         .padStart(2, "0");
     const seconds = (elapsedTime % 60).toString().padStart(2, "0");
 
-    
-    console.log(getCurrentPakistaniTime())
 
     return (
         <Provider>
@@ -204,7 +209,7 @@ useEffect(() => {
                                     })}
                             </View>
                         </View>
-                        {inUseTable.game_type === "Century" &&
+                        {inUseTable?.game_type === "Century" &&
                             <View style={styles.centuryMatch}>
                                 <Text style={styles.inputLabel}>Match Duration</Text>
                                 <View style={styles.timerContainer}>

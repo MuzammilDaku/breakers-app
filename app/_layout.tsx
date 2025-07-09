@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, useNavigation } from 'expo-router';
+import { router, Stack, useNavigation } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
@@ -50,6 +50,16 @@ export default function RootLayout() {
                 <Ionicons name="arrow-back" size={20} />
               </TouchableOpacity>
             ) : null,
+        }} />
+
+          <Stack.Screen name="billing" options={{
+          title: "Billing", headerLeft: () =>
+              <TouchableOpacity
+                onPress={() => router.navigate("/(tabs)")}
+              style={{  marginRight:20,position:"relative",top:1}}
+              >
+                <Ionicons name="arrow-back" size={25} />
+              </TouchableOpacity>
         }} />
 
 

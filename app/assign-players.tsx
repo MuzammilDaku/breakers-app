@@ -1,4 +1,5 @@
 import { useAppStore } from '@/context/appStore';
+import { getCurrentPakistaniTime } from '@/services/utilities/getPakistaniTime';
 import { getRandomId } from '@/services/utilities/getRandomId';
 import Checkbox from 'expo-checkbox';
 import { router, useLocalSearchParams } from "expo-router";
@@ -6,8 +7,11 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from "react-native";
 export default function Assign() {
     const params = useLocalSearchParams();
-    const tables = useAppStore((state)=>state.tables);
-    const setInUseTables = useAppStore((state)=>state.setInUseTables)
+    const tables = useAppStore((state) => state.tables);
+    const customers = useAppStore((state) => state.customers);
+    const setCustomers = useAppStore((state) => state.setCustomers);
+
+    const setInUseTables = useAppStore((state) => state.setInUseTables)
     const { table_id } = params;
     const table = tables.filter((item) => item._id == table_id)[0];
     const [isChecked, setChecked] = useState(true);
@@ -28,7 +32,7 @@ export default function Assign() {
     const handleChange = (field: string, value: string | boolean) => {
         setMatchInfo({ ...matchInfo, [field]: value })
     }
- 
+
 
     useEffect(() => {
         if (matchInfo.game_mode == '1 v 1' && matchInfo.friendly_match) {
@@ -39,7 +43,7 @@ export default function Assign() {
                 setIsDisabled(true)
             }
         }
-        if(matchInfo.game_mode == '1 v 1' && !matchInfo.friendly_match) {
+        if (matchInfo.game_mode == '1 v 1' && !matchInfo.friendly_match) {
             if (matchInfo.player_name1 && matchInfo.player_name2) {
                 setIsDisabled(false)
             }
@@ -66,8 +70,19 @@ export default function Assign() {
     }, [matchInfo]);
 
     const handleClick = () => {
-        setInUseTables(matchInfo)
+        setInUseTables(matchInfo);
         ToastAndroid.showWithGravity("Match Started", ToastAndroid.SHORT, ToastAndroid.TOP);
+
+        setCustomers({ name: matchInfo.player_name1, date: getCurrentPakistaniTime() });
+        if (matchInfo.player_name2) {
+            setCustomers({ name: matchInfo.player_name2, date: getCurrentPakistaniTime() });
+        }
+        if (matchInfo.player_name3) {
+            setCustomers({ name: matchInfo.player_name3, date: getCurrentPakistaniTime() });
+        }
+        if (matchInfo.player_name4) {
+            setCustomers({ name: matchInfo.player_name4, date: getCurrentPakistaniTime() });
+        }
         setMatchInfo({
             player_name1: '',
             player_name2: "",
@@ -77,10 +92,9 @@ export default function Assign() {
             game_type: 'One Red',
             friendly_match: true,
             table,
-            _id: getRandomId()  
+            _id: getRandomId()
         })
-       return router.navigate('/(tabs)');
-
+        return router.navigate('/(tabs)');
     };
 
     return (
