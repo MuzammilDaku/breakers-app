@@ -1,23 +1,73 @@
-import { useAppStore } from "@/context/appStore";
+import { PaidBill, useAppStore } from "@/context/appStore";
+import { useOfflineStore } from "@/context/offlineStore";
+import { baseUrl } from "@/services/base";
+import { AddCheckIn } from "@/services/table";
+import { getCurrentPakistaniTime } from "@/services/utilities/getPakistaniTime";
+import { getRandomId } from "@/services/utilities/getRandomId";
+import { isInternetConnected } from "@/services/utilities/isInternetConnected";
 import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator } from "react-native-paper";
 
 export default function Billing() {
     const params = useLocalSearchParams();
     const customer = params.customer_name;
-    const addPaidStatus = useAppStore((state)=>state.addPaidStatus)
-    const billTables = useAppStore((state) => state.billTables).filter((item)=>item.status !== "paid");
+    const addPaidStatus = useAppStore((state) => state.addPaidStatus)
+    const billTables = useAppStore((state) => state.billTables).filter((item) => item.status !== "paid");
     const customerBillTables = billTables?.filter((item) => item.loser === customer);
     const tablesName = customerBillTables?.map((item) => item?.inUseTable.table.name);
     const gameNames = customerBillTables?.map((item) => item?.inUseTable.game_type);
     const gameModes = customerBillTables?.map((item) => item?.inUseTable.game_mode);
-    const billIds = customerBillTables?.map((item)=>item._id);
+    const billIds = customerBillTables?.map((item) => item._id);
 
     const totalBill = customerBillTables?.reduce((sum, item) => sum + (item.total_bill || 0), 0);
-    
-    const handleClick = () => {
-        addPaidStatus(billIds);
-        router.navigate('/(tabs)');
+    const totalFrames = customerBillTables?.reduce((sum, item) => sum + (item.total_frame || 0), 0);
+    const totoalTimePlayed = customerBillTables?.reduce((sum, item) => sum + (item.total_time || 0), 0);
+
+
+
+    const setPaidBills = useAppStore((state) => state.setPaidBills);
+    const user = useAppStore((state) => state.user);
+    const addToQueue = useOfflineStore((state) => state.addToQueue);
+
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleClick = async () => {
+        if (typeof customer == "string" && user?._id) {
+            setIsLoading(true);
+            const isConnected = await isInternetConnected()
+            const payload: PaidBill = {
+                customer_name: customer,
+                created_by: user._id,
+                total_bill: totalBill,
+                table_names: tablesName,
+                game_names: gameNames,
+                game_mode: gameModes,
+                _id: getRandomId(),
+                date: getCurrentPakistaniTime()
+            }
+
+            if (totalFrames) payload.total_frame = totalFrames;
+            if (totoalTimePlayed) payload.time_played = totoalTimePlayed;
+
+            if (isConnected) {
+                const res = await AddCheckIn(payload);
+                console.log(res);
+            }
+            else {
+                addToQueue({
+                    url: baseUrl + '/check-in',
+                    method: "POST",
+                    body: payload,
+                    id: getRandomId()
+                })
+            }
+            setPaidBills(payload);
+            addPaidStatus(billIds);
+            router.navigate('/(tabs)');
+            setIsLoading(false)
+        }
     };
 
 
@@ -73,7 +123,7 @@ export default function Billing() {
                 </View>
                 <View style={styles.btnGenerate}>
                     <TouchableOpacity onPress={handleClick}>
-                        <Text style={{ textAlign: "center", color: "#fefefe", fontSize: 16 }}>Generate & Print Bill</Text>
+                        <Text style={{ textAlign: "center", color: "#fefefe", fontSize: 16 }}>{!isLoading ? "Generate & Print Bill" : <ActivityIndicator color={'#fefefe'} />}</Text>
                     </TouchableOpacity>
                 </View>
             </View>

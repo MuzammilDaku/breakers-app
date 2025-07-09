@@ -1,6 +1,10 @@
 import { useAppStore, UserBillTable } from "@/context/appStore";
+import { useOfflineStore } from "@/context/offlineStore";
+import { baseUrl } from "@/services/base";
+import { AddGameHistory, DeleteInUseTable } from "@/services/table";
 import { getCurrentPakistaniTime } from "@/services/utilities/getPakistaniTime";
 import { getRandomId } from "@/services/utilities/getRandomId";
+import { isInternetConnected } from "@/services/utilities/isInternetConnected";
 import { MaterialIcons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import timezone from 'dayjs/plugin/timezone';
@@ -8,6 +12,7 @@ import utc from 'dayjs/plugin/utc';
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+    ActivityIndicator,
     Keyboard,
     StyleSheet,
     TouchableOpacity,
@@ -20,6 +25,8 @@ import { Provider, Text, TextInput } from "react-native-paper";
 export default function MatchTracker() {
     const inUseTables = useAppStore((state) => state.inUseTables);
     const tables = useAppStore((state) => state.tables);
+    const user = useAppStore((state) => state.user);
+
     const setBillTables = useAppStore((state) => state.setBillTables);
     const deleteInUseTable = useAppStore((state) => state.deleteInUseTable);
 
@@ -93,7 +100,11 @@ export default function MatchTracker() {
         }
     };
 
-    const handleEndGame = () => {
+    const addToQueue = useOfflineStore((state) => state.addToQueue)
+
+    const [isLoading, setIsLoading] = useState(false);
+    const handleEndGame = async () => {
+        setIsLoading(true)
         setTimerRunning(false);
         const payload: UserBillTable = {
             _id: getRandomId(),
@@ -102,12 +113,33 @@ export default function MatchTracker() {
             loser: loser,
             total_bill: totalBill(),
             game_type: inUseTable.game_type,
+            created_by: user?._id,
+            date: getCurrentPakistaniTime()
         }
         if (inUseTable.game_type == "Century") {
-            payload.total_time=elapsedTime;
+            payload.total_time = elapsedTime;
         }
         else payload.total_frame = 1;
 
+        const isConnected = await isInternetConnected();
+
+        if (isConnected) {
+            await DeleteInUseTable(inUseTable?._id)
+            await AddGameHistory(payload)
+        }
+        else {
+            addToQueue({
+                method:"DELETE",
+                url:baseUrl+`/table/in-use?id=${inUseTable?._id}`,
+                id:getRandomId()
+            })
+            addToQueue({
+                method: "POST",
+                url: baseUrl + '/table/game-history',
+                body: payload,
+                id: getRandomId()
+            })
+        }
         setBillTables(payload);
         router.navigate({
             pathname: "/billing", params: {
@@ -116,6 +148,7 @@ export default function MatchTracker() {
         })
         deleteInUseTable(inUseTable);
         setTimerRunning(true);
+        setIsLoading(false)
     };
 
 
@@ -239,7 +272,7 @@ export default function MatchTracker() {
                         <View style={[isDisabled ? styles.btnDisabled : styles.btnPrimary]}>
                             <TouchableOpacity onPress={handleEndGame} disabled={isDisabled}>
                                 <Text style={styles.btnPrimaryText}>
-                                    End Game & Print Bill
+                                    {!isLoading ? "End Game & Print Bill" : <ActivityIndicator color={'#fefe'} />}
                                 </Text>
                             </TouchableOpacity>
                         </View>

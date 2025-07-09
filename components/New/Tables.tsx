@@ -41,7 +41,7 @@ export default function Tables(props: { selectedFilter: string }) {
                     setTables(response);
                 }
             } catch (error) {
-                console.error("Error fetching tables:", error);
+                // console.error("Error fetching tables:", error);
             }
         }
         if (hasLoaded && queue.length === 0) {
@@ -50,12 +50,12 @@ export default function Tables(props: { selectedFilter: string }) {
     }, [hasLoaded, user]);
 
     const gameModeCheck = (table: Table) => {
-        const data = inUseTables.filter(
-            (inUseTable) => String(inUseTable.table._id) === String(table._id)
+        const data = inUseTables?.filter(
+            (inUseTable) => String(inUseTable?.table._id) === String(table._id)
         );
 
         if (data.length > 0) {
-            const isFriendly = data.some((inUseTable) => inUseTable.friendly_match);
+            const isFriendly = data?.some((inUseTable) => inUseTable.friendly_match);
             return isFriendly ? "Friendly Match" : "In Use";
         }
 

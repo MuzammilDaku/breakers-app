@@ -1,7 +1,11 @@
+import { baseUrl } from '@/services/base';
+import { AddCustomer } from '@/services/table';
 import { getCurrentPakistaniTime } from '@/services/utilities/getPakistaniTime';
+import { getRandomId } from '@/services/utilities/getRandomId';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useOfflineStore } from './offlineStore';
 
 export interface User {
   name: string;
@@ -51,9 +55,10 @@ interface InUseTable {
   game_mode: string;
   friendly_match: boolean;
   date?: string;
+  created_by: any;
 }
 
-interface UserBillTable {
+export interface UserBillTable {
   _id: string;
   inUseTable: InUseTable;
   winner: string;
@@ -66,11 +71,27 @@ interface UserBillTable {
   date?: string;
   game_type: string;
   status?: string;
+  created_by?: any
 }
 
 interface Customer {
   name: string;
   date: string;
+  _id: string;
+}
+
+
+export interface PaidBill {
+  created_by: any;
+  total_frame?: number;
+  total_bill: number;
+  customer_name: string;
+  date?: any;
+  _id: string;
+  game_mode: string[]
+  time_played?: number;
+  game_names: string[];
+  table_names: string[]
 }
 
 interface AppStore {
@@ -98,11 +119,24 @@ interface AppStore {
 
   billTables: UserBillTable[];
   setBillTables: (table: UserBillTable) => void;
+  setAllBillTables: (table: UserBillTable[]) => void;
+
 
   customers: Customer[];
-  setCustomers: (customers: Customer) => void;
-  addPaidStatus:(ids:string[])=>void;
+  setCustomerOnline: (customers: Customer) => void;
+  setCustomerOffline: (customers: Customer) => void;
+
+  setAllCustomers: (customer: Customer[]) => void;
+  addPaidStatus: (ids: string[]) => void;
+
+  paidBills: PaidBill[];
+  setPaidBills: (bill: PaidBill) => void;
+  setAllInUseTables: (table: InUseTable[]) => void;
+  setAllPaidBills: (bill: PaidBill[]) => void;
+
 }
+
+
 
 export const useAppStore = create<AppStore>()(
   persist(
@@ -140,23 +174,52 @@ export const useAppStore = create<AppStore>()(
         set({ billTables: [...(get().billTables || []), { ...table, date: getCurrentPakistaniTime() }] });
       },
       customers: [],
-      setCustomers: (customer: Customer) => {
-        const customers = get().customers || [];
-        if (customers.some(c => c.name === customer.name)) {
-          set({ customers });
-        } else {
-          set({ customers: [...customers, customer] });
-        }
-      },
+     
       deleteInUseTable: (table: InUseTable) => {
         set({ inUseTables: get().inUseTables.filter((item) => item._id !== table._id) });
       },
-      addPaidStatus:(ids)=>{
-        
+      addPaidStatus: (ids) => {
         const updatedBillTables = get().billTables.map(bill =>
           ids.includes(bill._id) ? { ...bill, status: 'paid' } : bill
         );
         set({ billTables: updatedBillTables });
+      },
+      paidBills: [],
+      setPaidBills: (bill) => {
+        set({ paidBills: [...(get().paidBills || []), { ...bill, date: getCurrentPakistaniTime() }] })
+      },
+      setAllCustomers: (customers) => {
+        set({ customers: customers })
+      },
+      setAllInUseTables: (tables) => {
+        set({ inUseTables: tables })
+      },
+      setAllPaidBills:(bills)=>{
+        set({paidBills:bills})
+      },
+      setAllBillTables:(table)=>{
+        set({billTables:table})
+      },
+      setCustomerOnline: async (customer: Customer) => {
+        const customers = get().customers || [];
+        if (customers.some(c => c.name === customer.name)) {
+          set({ customers });
+        } else {
+          await AddCustomer(customer);
+        }
+      },
+      setCustomerOffline: async(customer: Customer) => {
+        const customers = get().customers || [];
+        if (!customers.some(c => c.name === customer.name)) {
+          set({ customers: [...customers, customer] });
+          await useOfflineStore().addToQueue({
+            method: "POST",
+            url: baseUrl + '/customer',
+            id: getRandomId(),
+            body: customer
+          });
+        }
+      
       }
     }),
 

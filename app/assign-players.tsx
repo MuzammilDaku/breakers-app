@@ -1,16 +1,22 @@
 import { useAppStore } from '@/context/appStore';
+import { useOfflineStore } from '@/context/offlineStore';
+import { baseUrl } from '@/services/base';
+import { AddInUseTable } from '@/services/table';
 import { getCurrentPakistaniTime } from '@/services/utilities/getPakistaniTime';
 import { getRandomId } from '@/services/utilities/getRandomId';
+import { isInternetConnected } from '@/services/utilities/isInternetConnected';
 import Checkbox from 'expo-checkbox';
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from "react-native";
 export default function Assign() {
     const params = useLocalSearchParams();
     const tables = useAppStore((state) => state.tables);
     const customers = useAppStore((state) => state.customers);
-    const setCustomers = useAppStore((state) => state.setCustomers);
+    const setCustomerOffline = useAppStore((state) => state.setCustomerOffline);
+    const setCustomerOnline = useAppStore((state) => state.setCustomerOnline);
 
+    const user = useAppStore((state) => state.user)
     const setInUseTables = useAppStore((state) => state.setInUseTables)
     const { table_id } = params;
     const table = tables.filter((item) => item._id == table_id)[0];
@@ -24,7 +30,9 @@ export default function Assign() {
         game_type: 'One Red',
         friendly_match: true,
         table,
-        _id: getRandomId()
+        _id: getRandomId(),
+        created_by: user?._id,
+        date: getCurrentPakistaniTime()
     });
 
     const [isDisabled, setIsDisabled] = useState(true);
@@ -69,32 +77,63 @@ export default function Assign() {
         }
     }, [matchInfo]);
 
-    const handleClick = () => {
-        setInUseTables(matchInfo);
-        ToastAndroid.showWithGravity("Match Started", ToastAndroid.SHORT, ToastAndroid.TOP);
+    const addToQueue = useOfflineStore((state) => state.addToQueue);
 
-        setCustomers({ name: matchInfo.player_name1, date: getCurrentPakistaniTime() });
-        if (matchInfo.player_name2) {
-            setCustomers({ name: matchInfo.player_name2, date: getCurrentPakistaniTime() });
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleClick = async () => {
+        try {
+            setIsLoading(true);
+
+        const isConnected = await isInternetConnected();
+        const currentTime = getCurrentPakistaniTime();
+
+        const players = [
+            matchInfo.player_name1,
+            matchInfo.player_name2,
+            matchInfo.player_name3,
+            matchInfo.player_name4,
+        ].filter(Boolean); // Remove empty/undefined names
+
+        const addCustomer = (name: string, action: typeof setCustomerOnline | typeof setCustomerOffline) => {
+            action({ name, date: currentTime, _id: getRandomId() });
+        };
+
+        if (isConnected) {
+            players.forEach((name) => addCustomer(name, setCustomerOnline));
+            await AddInUseTable(matchInfo);
+        } else {
+            players.forEach((name) => addCustomer(name, setCustomerOffline));
+            addToQueue({
+                method: "POST",
+                url: baseUrl + '/table/in-use',
+                body: matchInfo,
+                id: getRandomId(),
+            });
         }
-        if (matchInfo.player_name3) {
-            setCustomers({ name: matchInfo.player_name3, date: getCurrentPakistaniTime() });
-        }
-        if (matchInfo.player_name4) {
-            setCustomers({ name: matchInfo.player_name4, date: getCurrentPakistaniTime() });
-        }
+
+        setInUseTables(matchInfo);
+
         setMatchInfo({
             player_name1: '',
-            player_name2: "",
-            player_name3: "",
-            player_name4: "",
+            player_name2: '',
+            player_name3: '',
+            player_name4: '',
             game_mode: '1 v 1',
             game_type: 'One Red',
             friendly_match: true,
             table,
-            _id: getRandomId()
-        })
+            _id: getRandomId(),
+            created_by: '',
+            date: '',
+        });
+
+        setIsLoading(false);
+        ToastAndroid.showWithGravity("Match Started", ToastAndroid.SHORT, ToastAndroid.TOP);
         return router.navigate('/(tabs)');
+        } catch (error) {
+            console.log(error)
+        }
     };
 
     return (
@@ -175,9 +214,11 @@ export default function Assign() {
                     </View>
                 </View>
 
-                <View style={[isDisabled ? styles.btnDisabled : styles.btn]}>
-                    <TouchableOpacity onPress={handleClick} disabled={isDisabled}>
-                        <Text style={{ textAlign: "center", color: "#fefefe", fontSize: 16 }}>Start Match</Text>
+                <View style={[isDisabled || isLoading ? styles.btnDisabled : styles.btn]}>
+                    <TouchableOpacity onPress={handleClick} disabled={isDisabled || isLoading}>
+                        <Text style={{ textAlign: "center", color: "#fefefe", fontSize: 16 }}>
+                            {isLoading ? <ActivityIndicator color={'#fefe'} /> : 'Start Match'}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>

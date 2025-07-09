@@ -12,7 +12,7 @@ type OfflineApiCall = {
 type OfflineStore = {
   queue: OfflineApiCall[];
   syncing: boolean;
-  hasLoaded: boolean; // 👈 add this
+  hasLoaded: boolean; 
   addToQueue: (call: OfflineApiCall) => void;
   syncQueue: () => Promise<void>;
 };

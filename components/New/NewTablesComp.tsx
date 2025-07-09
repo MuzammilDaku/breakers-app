@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import TablePills from "./TablePills";
 import Tables from "./Tables";
 export default function NewTablesComp() {
     const [selectedFilter, setSelectedFilter] = useState("all");
 
+    useEffect(()=>{
+
+    },[])
     return (
         <View style={styles.conatiner}>
             <View style={{ marginHorizontal: 15 }}>
