@@ -1,4 +1,4 @@
-import { useAppStore } from "@/context/appStore";
+import { useAppStore, UserBillTable } from "@/context/appStore";
 import { getCurrentPakistaniTime } from "@/services/utilities/getPakistaniTime";
 import { getRandomId } from "@/services/utilities/getRandomId";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -23,6 +23,7 @@ export default function MatchTracker() {
     const setBillTables = useAppStore((state) => state.setBillTables);
     const deleteInUseTable = useAppStore((state) => state.deleteInUseTable);
 
+    const [isDisabled, setIsDisabled] = useState(true);
     const params = useLocalSearchParams();
     const { table_id } = params;
 
@@ -73,7 +74,6 @@ export default function MatchTracker() {
 
     const [elapsedTime, setElapsedTime] = useState(0);
     const [timerRunning, setTimerRunning] = useState(true);
-    const [frames, setFrames] = useState(1);
 
     const totalBill = () => {
         if (inUseTable?.game_type === "Century" && table?.century_rate) {
@@ -95,25 +95,28 @@ export default function MatchTracker() {
 
     const handleEndGame = () => {
         setTimerRunning(false);
-        setBillTables({
+        const payload: UserBillTable = {
             _id: getRandomId(),
             inUseTable: inUseTable,
             winner: winner,
             loser: loser,
             total_bill: totalBill(),
-            total_frame: frames,
-            total_time: elapsedTime,
             game_type: inUseTable.game_type,
-        });
-        router.navigate({pathname:"/billing",params:{
-            customer_name:loser
-        }})
+        }
+        if (inUseTable.game_type == "Century") {
+            payload.total_time=elapsedTime;
+        }
+        else payload.total_frame = 1;
+
+        setBillTables(payload);
+        router.navigate({
+            pathname: "/billing", params: {
+                customer_name: loser
+            }
+        })
         deleteInUseTable(inUseTable);
         setTimerRunning(true);
-        // console.log(totalBill());
     };
-
-
 
 
     dayjs.extend(utc);
@@ -148,6 +151,13 @@ export default function MatchTracker() {
         .padStart(2, "0");
     const seconds = (elapsedTime % 60).toString().padStart(2, "0");
 
+
+    useEffect(() => {
+        if (!winner || !loser) {
+            setIsDisabled(true);
+        }
+        else setIsDisabled(false)
+    }, [winner, loser])
 
     return (
         <Provider>
@@ -219,15 +229,15 @@ export default function MatchTracker() {
 
                             </View>}
                         <View style={styles.btnSecondary}>
-                            <TouchableOpacity>
+                            <TouchableOpacity disabled={isDisabled}>
                                 <Text style={styles.btnSecondaryText}>
                                     Add One More Game
                                 </Text>
                             </TouchableOpacity>
                         </View>
 
-                        <View style={styles.btnPrimary}>
-                            <TouchableOpacity onPress={handleEndGame}>
+                        <View style={[isDisabled ? styles.btnDisabled : styles.btnPrimary]}>
+                            <TouchableOpacity onPress={handleEndGame} disabled={isDisabled}>
                                 <Text style={styles.btnPrimaryText}>
                                     End Game & Print Bill
                                 </Text>
@@ -340,5 +350,17 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: "500",
     },
+    btnDisabled: {
+        marginVertical: 15,
+        height: 50,
+        // textAlign:"center",
+        backgroundColor: "#AAB3D1",
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: '#AAB3D1'
+    }
 
 });

@@ -8,6 +8,22 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native
 export default function Tables(props: { selectedFilter: string }) {
     // const { tables, setTables, user, inUseTables } = useAppStore();
     const tables = useAppStore((state) => state.tables);
+    const filteredTables = () => {
+        if(props.selectedFilter === "all") {
+            return tables;
+        }
+        else  {
+            return tables.filter((table)=>{
+                const status = gameModeCheck(table);
+                if(status == "Free" && props.selectedFilter === "free") {
+                    return table
+                }
+                if((status === "In Use" || status === "Friendly Match") && props.selectedFilter == "occupied") {
+                    return table
+                }
+            })
+        }
+    }
     const setTables = useAppStore((state) => state.setTables);
     const user = useAppStore((state) => state.user);
     const inUseTables = useAppStore((state) => state.inUseTables);
@@ -51,7 +67,7 @@ export default function Tables(props: { selectedFilter: string }) {
     return (
         <View style={styles.container}>
             <FlatList
-                data={tables}
+                data={filteredTables()}
                 keyExtractor={item => item._id}
                 renderItem={({ item }) => {
                     return (
