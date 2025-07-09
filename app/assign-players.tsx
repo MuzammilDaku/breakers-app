@@ -27,7 +27,6 @@ export default function Assign() {
 
     const handleChange = (field: string, value: string | boolean) => {
         setMatchInfo({ ...matchInfo, [field]: value })
-
     }
  
 
@@ -64,7 +63,6 @@ export default function Assign() {
                 setIsDisabled(true)
             }
         }
-        // console.log(isDisabled)
     }, [matchInfo]);
 
     const handleClick = () => {
@@ -79,7 +77,7 @@ export default function Assign() {
             game_type: 'One Red',
             friendly_match: true,
             table,
-            _id: getRandomId()
+            _id: getRandomId()  
         })
        return router.navigate('/(tabs)');
 

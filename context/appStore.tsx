@@ -1,3 +1,4 @@
+import { getCurrentPakistaniTime } from '@/services/utilities/getPakistaniTime';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -19,9 +20,9 @@ export interface Table {
   ten_red_rate: Number;
   century_rate: Number;
   one_red_rate: Number
-  fifteen_red_rate:Number;
-  _id:string;
-  date?:Date
+  fifteen_red_rate: Number;
+  _id: string;
+  date?: Date
 }
 
 export interface History {
@@ -35,20 +36,36 @@ export interface History {
   received_amount: number;
   date: any;
   _id: string;
-  types?:string;
-  frames?:string;
+  types?: string;
+  frames?: string;
 }
 
 interface InUseTable {
-  table:Table;
-  _id:string;
-  player_name1:string;
-  player_name2?:string;  
-  player_name3?:string; 
-  player_name4?:string;
+  table: Table;
+  _id: string;
+  player_name1: string;
+  player_name2?: string;
+  player_name3?: string;
+  player_name4?: string;
+  game_type: string;
+  game_mode: string;
+  friendly_match: boolean;
+  date?: string;
+}
+
+interface UserBillTable {
+  _id: string;
+  table: Table;
+  inUseTable: InUseTable;
+  winner: string;
+  loser: string;
+  total_bill: number |  undefined;
+  total_frame?: number;
+  total_time?: number;
+  total_bill_per_frame?: number;
+  total_bill_per_minute?: number;
+  date?:Date;
   game_type:string;
-  game_mode:string;
-  friendly_match:boolean;
 }
 
 interface AppStore {
@@ -56,10 +73,10 @@ interface AppStore {
   setUser: (user: User | null) => void;
 
   tables: Table[];
-  setTables: (tables: Table[] ) => void;
+  setTables: (tables: Table[]) => void;
   addTable: (table: Table) => void;
-  editTable:(table:Table) =>void
-  deleteTable:(table:Table) =>void
+  editTable: (table: Table) => void
+  deleteTable: (table: Table) => void
 
   addHistory: (history: History) => void;
 
@@ -68,10 +85,13 @@ interface AppStore {
 
   history: History[];
   setHistory: (history: History[]) => void;
-   
-  inUseTables:InUseTable[];
-  setInUseTables:(table:InUseTable)=>void;
-  
+
+  inUseTables: InUseTable[];
+  setInUseTables: (table: InUseTable) => void;
+
+  billTables: UserBillTable[];
+  setBillTables: (table: UserBillTable) => void;
+
 }
 
 export const useAppStore = create<AppStore>()(
@@ -98,15 +118,19 @@ export const useAppStore = create<AppStore>()(
             : t
         ),
       }),
-      deleteTable:(table:Table) => {
+      deleteTable: (table: Table) => {
         set({ tables: get().tables.filter((item) => item._id !== table._id) });
-        // set({})
       },
-      inUseTables:[],
-      setInUseTables:(table:InUseTable)=>{
-        set({inUseTables:[...get().inUseTables || [],table]})
-      }
+      inUseTables: [],
+      setInUseTables: (table: InUseTable) => {
+        set({ inUseTables: [...(get().inUseTables || []), { ...table, date: getCurrentPakistaniTime() }] })
+      },
+      billTables: [],
+      setBillTables(table: UserBillTable) {
+        set({ billTables: [...(get().billTables || []), { ...table, date: new Date() }] });
+      },
     }),
+
     {
       name: 'app-store', // key in AsyncStorage
       storage: {

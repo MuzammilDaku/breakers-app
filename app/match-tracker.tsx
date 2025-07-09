@@ -1,73 +1,254 @@
 import { useAppStore } from "@/context/appStore";
+import { getCurrentPakistaniTime } from "@/services/utilities/getPakistaniTime";
+import { MaterialIcons } from "@expo/vector-icons";
+import dayjs from "dayjs";
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+    Keyboard,
+    StyleSheet,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View
+} from "react-native";
+import { Provider, Text, TextInput } from "react-native-paper";
+
+
 export default function MatchTracker() {
-    const inUseTables = useAppStore((state)=>state.inUseTables);
-    const tables = useAppStore((state)=>state.tables);
+    const inUseTables = useAppStore((state) => state.inUseTables);
+    const tables = useAppStore((state) => state.tables);
+    const setBillTables = useAppStore((state) => state.setBillTables);
     const params = useLocalSearchParams();
-    const {table_id} = params;
-    const inUseTable = inUseTables.filter((item)=> item.table._id === table_id)[0];
-    const table = tables.filter((item)=>item._id === table_id)[0];
-    const players : {
-        player_name1:string,
-        player_name2?:string,
-        player_name3?:string,
-        player_name4?:string,
-    }= {
-        player_name1:inUseTable.player_name1
-    };
-    if(inUseTable.game_mode == "2 v 2" && inUseTable.friendly_match) {
-        players.player_name2=inUseTable.player_name2
-    }
-      if(inUseTable.game_mode == "1 v 1" && !inUseTable.friendly_match) {
-        players.player_name2=inUseTable.player_name2
-    }
-     if(inUseTable.game_mode == "2 v 2" && !inUseTable.friendly_match) {
-        players.player_name2=inUseTable.player_name2
-        players.player_name3=inUseTable.player_name3
-        players.player_name4=inUseTable.player_name4
+    const { table_id } = params;
 
+    const inUseTable = inUseTables.filter((item) => item.table._id === table_id)[0];
+    const table = tables.filter((item) => item._id === table_id)[0];
+
+    const players: string[] = [];
+    if (inUseTable.player_name1) players.push(inUseTable.player_name1);
+    if (
+        (inUseTable.game_mode === "2 v 2" && inUseTable.friendly_match) ||
+        (inUseTable.game_mode === "1 v 1" && !inUseTable.friendly_match) ||
+        (inUseTable.game_mode === "2 v 2" && !inUseTable.friendly_match)
+    ) {
+        if (inUseTable.player_name2) players.push(inUseTable.player_name2);
     }
-    return (
-        <View style={styles.conatiner}>
-            <View style={{ marginHorizontal: 25 }}>
-               <View style={{display:"flex",flexDirection:"row",width:"100%"}}>
-                 <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>Winner *</Text>
-                    <TextInput placeholder="Enter Player Name" style={styles.input} />
-                </View>
-                <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>Loser *</Text>
-                    <TextInput placeholder="Enter Player Name" style={styles.input} />
-                </View>
-               </View>
-            
-                <View style={styles.btn}>
-                    <TouchableOpacity>
-                        <Text style={{ textAlign: "center", color: "#fefefe", fontSize: 16 }}>End Game & Print Bill</Text>
+    if (inUseTable.game_mode === "2 v 2" && !inUseTable.friendly_match) {
+        if (inUseTable.player_name3) players.push(inUseTable.player_name3);
+        if (inUseTable.player_name4) players.push(inUseTable.player_name4);
+    }
+
+    const [winner, setWinner] = useState("");
+    const [loser, setLoser] = useState("");
+    const [winnerSearch, setWinnerSearch] = useState("");
+    const [loserSearch, setLoserSearch] = useState("");
+    const [showWinnerDropdown, setShowWinnerDropdown] = useState(false);
+    const [showLoserDropdown, setShowLoserDropdown] = useState(false);
+
+    const winnerOptions = players.filter(
+        (p) => p.toLowerCase().includes(winnerSearch.toLowerCase()) && p !== loser
+    );
+    const loserOptions = players.filter(
+        (p) => p.toLowerCase().includes(loserSearch.toLowerCase()) && p !== winner
+    );
+
+    const renderDropdown = (options: string[], onSelect: (p: string) => void) => {
+        if (options.length === 0) return null;
+
+        return (
+            <View style={styles.dropdown}>
+                {options.map((p) => (
+                    <TouchableOpacity key={p} onPress={() => onSelect(p)}>
+                        <Text style={styles.dropdownItem}>{p}</Text>
                     </TouchableOpacity>
-                </View>
+                ))}
             </View>
+        );
+    };
 
-        </View>
-    )
+    const [elapsedTime, setElapsedTime] = useState(0);
+    const [timerRunning, setTimerRunning] = useState(true);
+    const [frames,setFrames] = useState(1);
+
+    const totalBill = () => {
+        if (inUseTable.game_type === "Century" && table.century_rate) {
+            return Math.round(Number(table.century_rate) * elapsedTime / 60);
+        }
+        if (inUseTable.game_type === "One Red" && table.one_red_rate) {
+            return Math.round(Number(table.one_red_rate) * frames);
+        }
+        if (inUseTable.game_type === "Six Red" && table.six_red_rate) {
+            return Math.round(Number(table.six_red_rate)* frames);
+        }
+        if (inUseTable.game_type === "Ten Red" && table.ten_red_rate) {
+            return Math.round(Number(table.ten_red_rate)* frames);
+        }
+        if (inUseTable.game_type === "Fifteen Red" && table.fifteen_red_rate) {
+            return Math.round(Number(table.fifteen_red_rate)* frames);
+        }
+    };
+
+    const handleEndGame = () => {
+        // setBillTables({
+        //     _id: getRandomId(),
+        //     table: table,
+        //     inUseTable: inUseTable,
+        //     winner: winner,
+        //     loser: loser,
+        //     total_bill: totalBill(),
+        //     total_frame: frames,
+        //     total_time: elapsedTime,
+        //     game_type: inUseTable.game_type,
+        //     date: new Date(),
+        // })
+        console.log(totalBill());
+    };
+
+
+
+
+   dayjs.extend(utc);
+dayjs.extend(timezone);
+
+useEffect(() => {
+  if (
+    inUseTable?.game_type === "Century" &&
+    inUseTable?.date &&
+    timerRunning
+  ) {
+    const updateTimer = () => {
+      const start = dayjs.tz(inUseTable.date, 'YYYY-MM-DD HH:mm:ss', 'Asia/Karachi');
+      const now = dayjs.tz(getCurrentPakistaniTime(), 'YYYY-MM-DD HH:mm:ss', 'Asia/Karachi');
+
+      const secondsElapsed = now.diff(start, 'second'); // ✅ Accurate
+      setElapsedTime(secondsElapsed);
+    };
+
+    updateTimer(); // First run
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+  }
+}, [inUseTable, timerRunning]);
+
+    const hours = Math.floor(elapsedTime / 3600)
+        .toString()
+        .padStart(2, "0");
+    const minutes = Math.floor((elapsedTime % 3600) / 60)
+        .toString()
+        .padStart(2, "0");
+    const seconds = (elapsedTime % 60).toString().padStart(2, "0");
+
+    
+    console.log(getCurrentPakistaniTime())
+
+    return (
+        <Provider>
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                <View style={styles.container}>
+                    <View style={{ marginHorizontal: 25 }}>
+                        <View style={{ flexDirection: "row", width: "100%" }}>
+                            {/* Winner Field */}
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.inputLabel}>Winner *</Text>
+                                <TextInput
+                                    mode="outlined"
+                                    placeholder="Enter Player Name"
+                                    value={winner}
+
+                                    onFocus={() => {
+                                        setShowWinnerDropdown(true);
+                                    }}
+                                    onBlur={() => setShowWinnerDropdown(false)}
+                                    onChangeText={(text) => {
+                                        setWinner(text);
+                                        setWinnerSearch(text);
+                                        setShowWinnerDropdown(true);
+                                    }}
+                                    style={styles.input}
+                                />
+                                {showWinnerDropdown &&
+                                    // winnerSearch.length > 0 &&
+                                    renderDropdown(winnerOptions, (p) => {
+                                        setWinner(p);
+                                        setWinnerSearch(p);
+                                        setShowWinnerDropdown(false);
+                                        Keyboard.dismiss();
+                                    })}
+                            </View>
+
+                            {/* Loser Field */}
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.inputLabel}>Loser *</Text>
+                                <TextInput
+                                    mode="outlined"
+                                    placeholder="Enter Player Name"
+                                    value={loser}
+                                    onFocus={() => setShowLoserDropdown(true)}
+                                    onChangeText={(text) => {
+                                        setLoser(text);
+                                        setLoserSearch(text);
+                                        setShowLoserDropdown(true);
+                                    }}
+                                    onBlur={() => setShowLoserDropdown(false)}
+                                    style={styles.input}
+                                />
+                                {showLoserDropdown &&
+                                    renderDropdown(loserOptions, (p) => {
+                                        setLoser(p);
+                                        setLoserSearch(p);
+                                        setShowLoserDropdown(false);
+                                        Keyboard.dismiss();
+                                    })}
+                            </View>
+                        </View>
+                        {inUseTable.game_type === "Century" &&
+                            <View style={styles.centuryMatch}>
+                                <Text style={styles.inputLabel}>Match Duration</Text>
+                                <View style={styles.timerContainer}>
+                                    <MaterialIcons name="multitrack-audio" size={40} color="black" />
+                                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>{hours}:{minutes}:{seconds}</Text>
+                                </View>
+
+                            </View>}
+                        <View style={styles.btnSecondary}>
+                            <TouchableOpacity>
+                                <Text style={styles.btnSecondaryText}>
+                                    Add One More Game
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.btnPrimary}>
+                            <TouchableOpacity onPress={handleEndGame}>
+                                <Text style={styles.btnPrimaryText}>
+                                    End Game & Print Bill
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </TouchableWithoutFeedback>
+        </Provider>
+    );
 }
 
-
 const styles = StyleSheet.create({
-    conatiner: {
+    container: {
         backgroundColor: "#f4f5f9",
-        height: "100%"
+        height: "100%",
     },
     inputContainer: {
         marginTop: 13,
-        flex:1,
-        marginRight:5,
-        height:"100%",
+        flex: 1,
+        marginRight: 5,
+        position: "relative",
     },
     inputLabel: {
         fontSize: 16,
-        fontWeight: '600'
+        fontWeight: "700",
     },
     input: {
         height: 40,
@@ -77,46 +258,82 @@ const styles = StyleSheet.create({
         fontSize: 14,
         borderColor: "#eeeff3",
         borderWidth: 1,
-    
-
     },
-    tabContainer: {
-        display: 'flex',
-        backgroundColor: "#fefefe",
-        borderColor: "#fefefe",
-        flexDirection: 'row',
-        height: 40,
-        justifyContent: "space-between",
-        // marginTop: 20,
-        alignItems: 'center',
-        borderRadius: 15,
+    dropdown: {
+        position: "absolute",
+        top: 75,
+        left: 0,
+        right: 0,
+        backgroundColor: "#fff",
+        borderColor: "#ccc",
+        borderWidth: 1,
+        borderRadius: 5,
+        zIndex: 10,
     },
-    pillText: {
-        fontSize: 16,
-        fontWeight: '600',
-        textAlign: 'center'
+    dropdownItem: {
+        padding: 10,
+        fontSize: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
     },
-    pill: {
-        borderRadius: 9,
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingVertical: 5,
-        marginHorizontal: 3
-    },
-    pillSelected: {
-        backgroundColor: "#f4f5f9",
+    dropdownItemDisabled: {
+        padding: 10,
+        fontSize: 14,
+        color: "#aaa",
     },
     btn: {
         marginVertical: 15,
         height: 50,
-        // textAlign:"center",
         backgroundColor: "#475ba3",
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
         borderRadius: 15,
         borderWidth: 1,
-        borderColor: '#475ba3'
-    }
-})
+        borderColor: "#475ba3",
+    },
+    centuryMatch: {
+        marginVertical: 10
+    },
+    timerContainer: {
+        marginTop: 10,
+        borderRadius: 10,
+        backgroundColor: "#fefefe",
+        height: 100,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#eeeff3",
+    },
+    btnPrimary: {
+        marginVertical: 15,
+        height: 50,
+        backgroundColor: "#475ba3",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 15,
+    },
+    btnPrimaryText: {
+        color: "#fefefe",
+        fontSize: 16,
+        fontWeight: "600",
+        textAlign: "center",
+    },
+
+    btnSecondary: {
+        marginTop: 5,
+        height: 40,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "#aaa",
+        backgroundColor: "#fefefe",
+    },
+    btnSecondaryText: {
+        color: "#475ba3",
+        fontSize: 14,
+        fontWeight: "500",
+    },
+
+});
