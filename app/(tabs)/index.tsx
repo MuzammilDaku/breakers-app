@@ -20,6 +20,7 @@ export default function HomeScreen() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    console.log(syncing)
     const pollAndSync = async () => {
       const isConnected = await isInternetConnected()
       if (isConnected && !syncing) {
@@ -33,7 +34,7 @@ export default function HomeScreen() {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, []);
+  }, [syncing]);
 
   const setAllCustomers = useAppStore((state) => state.setAllCustomers)
   const setAllInUseTables = useAppStore((state) => state.setAllInUseTables)
@@ -48,10 +49,10 @@ export default function HomeScreen() {
   async function GetInUseTable() {
     try {
       const res = await GetInUseTables(user?._id);
-    console.log(res)
-    setAllInUseTables(res);
+      console.log("res",res)
+      setAllInUseTables(res);
     } catch (error) {
-      console.log(error)
+      // console.log(error)
     }
 
   }

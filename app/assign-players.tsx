@@ -85,54 +85,54 @@ export default function Assign() {
         try {
             setIsLoading(true);
 
-        const isConnected = await isInternetConnected();
-        const currentTime = getCurrentPakistaniTime();
+            const isConnected = await isInternetConnected();
+            const currentTime = getCurrentPakistaniTime();
 
-        const players = [
-            matchInfo.player_name1,
-            matchInfo.player_name2,
-            matchInfo.player_name3,
-            matchInfo.player_name4,
-        ].filter(Boolean); // Remove empty/undefined names
+            const players = [
+                matchInfo.player_name1,
+                matchInfo.player_name2,
+                matchInfo.player_name3,
+                matchInfo.player_name4,
+            ].filter(Boolean); // Remove empty/undefined names
 
-        const addCustomer = (name: string, action: typeof setCustomerOnline | typeof setCustomerOffline) => {
-            action({ name, date: currentTime, _id: getRandomId() });
-        };
+            const addCustomer = (name: string, action: typeof setCustomerOnline | typeof setCustomerOffline) => {
+                action({ name, date: currentTime, _id: getRandomId() });
+            };
 
-        if (isConnected) {
-            players.forEach((name) => addCustomer(name, setCustomerOnline));
-            await AddInUseTable(matchInfo);
-        } else {
-            players.forEach((name) => addCustomer(name, setCustomerOffline));
-            addToQueue({
-                method: "POST",
-                url: baseUrl + '/table/in-use',
-                body: matchInfo,
-                id: getRandomId(),
+            if (isConnected) {
+                players.forEach((name) => addCustomer(name, setCustomerOnline));
+                await AddInUseTable(matchInfo);
+            } else {
+                players.forEach((name) => addCustomer(name, setCustomerOffline));
+                addToQueue({
+                    method: "POST",
+                    url: baseUrl + '/table/in-use',
+                    body: matchInfo,
+                    id: getRandomId(),
+                });
+            }
+
+            setInUseTables(matchInfo);
+
+            setMatchInfo({
+                player_name1: '',
+                player_name2: '',
+                player_name3: '',
+                player_name4: '',
+                game_mode: '1 v 1',
+                game_type: 'One Red',
+                friendly_match: true,
+                table,
+                _id: getRandomId(),
+                created_by: '',
+                date: '',
             });
-        }
 
-        setInUseTables(matchInfo);
-
-        setMatchInfo({
-            player_name1: '',
-            player_name2: '',
-            player_name3: '',
-            player_name4: '',
-            game_mode: '1 v 1',
-            game_type: 'One Red',
-            friendly_match: true,
-            table,
-            _id: getRandomId(),
-            created_by: '',
-            date: '',
-        });
-
-        setIsLoading(false);
-        ToastAndroid.showWithGravity("Match Started", ToastAndroid.SHORT, ToastAndroid.TOP);
-        return router.navigate('/(tabs)');
+            setIsLoading(false);
+            ToastAndroid.showWithGravity("Match Started", ToastAndroid.SHORT, ToastAndroid.TOP);
+            return router.navigate('/(tabs)');
         } catch (error) {
-            console.log(error)
+            console.log("error", error)
         }
     };
 

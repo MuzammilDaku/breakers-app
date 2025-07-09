@@ -50,12 +50,12 @@ export default function Tables(props: { selectedFilter: string }) {
     }, [hasLoaded, user]);
 
     const gameModeCheck = (table: Table) => {
-        const data = inUseTables?.filter(
-            (inUseTable) => String(inUseTable?.table._id) === String(table._id)
-        );
+        const data = inUseTables.length > 0 ? inUseTables?.filter(
+            (inUseTable) => String(inUseTable?.table._id) === String(table?._id)
+        ):[];
 
-        if (data.length > 0) {
-            const isFriendly = data?.some((inUseTable) => inUseTable.friendly_match);
+        if (data?.length > 0) {
+            const isFriendly = data?.some((inUseTable) => inUseTable?.friendly_match);
             return isFriendly ? "Friendly Match" : "In Use";
         }
 
