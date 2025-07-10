@@ -1,7 +1,7 @@
 import { PaidBill, useAppStore } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
 import { baseUrl } from "@/services/base";
-import { AddCheckIn } from "@/services/table";
+import { AddCheckIn, UpdateGameHistory } from "@/services/table";
 import { getCurrentPakistaniTime } from "@/services/utilities/getPakistaniTime";
 import { getRandomId } from "@/services/utilities/getRandomId";
 import { isInternetConnected } from "@/services/utilities/isInternetConnected";
@@ -34,7 +34,8 @@ export default function Billing() {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleClick = async () => {
-        if (typeof customer == "string" && user?._id) {
+        try {
+             if (typeof customer == "string" && user?._id) {
             setIsLoading(true);
             const isConnected = await isInternetConnected()
             const payload: PaidBill = {
@@ -54,6 +55,20 @@ export default function Billing() {
             if (isConnected) {
                 const res = await AddCheckIn(payload);
                 console.log(res);
+                for (const billId of billIds) {
+                    const bill = customerBillTables?.find((item) => item._id === billId);
+                    if (bill) {
+                        await UpdateGameHistory({
+                            _id: bill._id,
+                            status: "paid",
+                            paid_bill_id: payload._id
+                        });
+                    }
+                }
+                await UpdateGameHistory({
+                    bill_ids: billIds,
+                    status: "paid",
+                })
             }
             else {
                 addToQueue({
@@ -62,12 +77,31 @@ export default function Billing() {
                     body: payload,
                     id: getRandomId()
                 })
+                for (const billId of billIds) {
+                    const bill = customerBillTables?.find((item) => item._id === billId);
+                    if (bill) {
+                         addToQueue({
+                            url: baseUrl + '/table/game-history',
+                            method: "PUT",
+                            body: {
+                                _id: bill._id,
+                                status: "paid",
+                            },
+                            id: getRandomId()
+                        });
+                    }
+                }
             }
             setPaidBills(payload);
             addPaidStatus(billIds);
             router.navigate('/(tabs)');
             setIsLoading(false)
         }
+        } catch (error) {
+            console.error("Error in handleClick:", error);
+            
+        }
+       
     };
 
 

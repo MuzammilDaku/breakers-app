@@ -21,7 +21,8 @@ const periods = ['today', 'week', 'month', 'all'] as const;
 export default function Dashboard() {
     const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]>('today');
     console.log(selectedPeriod)
-    const { history } = useAppStore()
+    // const { history } = useAppStore()
+    const history = useAppStore((state)=>state.paidBills)
     // console.log(history)
     const getHistoryByDate = (period: typeof periods[number]) => {
         const now = new Date();
@@ -41,6 +42,7 @@ export default function Dashboard() {
 
         return history.filter((item: { date: string | Date }) => {
             const itemDate = new Date(item.date);
+            console.log(itemDate)
             return itemDate >= startDate && itemDate <= now;
         });
     };
@@ -64,10 +66,10 @@ export default function Dashboard() {
             all: (history || []).reduce((sum, item) => sum + (item.total_frame || 0), 0),
         },
         received: {
-            today: todayHistory?.reduce((sum, item) => sum + (item.received_amount || 0), 0),
-            week: weekHistory?.reduce((sum, item) => sum + (item.received_amount || 0), 0),
-            month: monthHistory?.reduce((sum, item) => sum + (item.received_amount || 0), 0),
-            all: (history || []).reduce((sum, item) => sum + (item.received_amount || 0), 0),
+            today: todayHistory?.reduce((sum, item) => sum + (item.total_bill || 0), 0),
+            week: weekHistory?.reduce((sum, item) => sum + (item.total_bill || 0), 0),
+            month: monthHistory?.reduce((sum, item) => sum + (item.total_bill || 0), 0),
+            all: (history || []).reduce((sum, item) => sum + (item.total_bill || 0), 0),
         }
     };
 

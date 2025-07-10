@@ -86,7 +86,7 @@ export interface PaidBill {
   total_frame?: number;
   total_bill: number;
   customer_name: string;
-  date?: any;
+  date: any;
   _id: string;
   game_mode: string[]
   time_played?: number;
@@ -174,14 +174,17 @@ export const useAppStore = create<AppStore>()(
         set({ billTables: [...(get().billTables || []), { ...table, date: getCurrentPakistaniTime() }] });
       },
       customers: [],
-     
+
       deleteInUseTable: (table: InUseTable) => {
         set({ inUseTables: get().inUseTables.filter((item) => item._id !== table._id) });
       },
       addPaidStatus: (ids) => {
-        const updatedBillTables = get().billTables.map(bill =>
-          ids.includes(bill._id) ? { ...bill, status: 'paid' } : bill
-        );
+        const stringIds = ids.map(String);
+        const updatedBillTables = get().billTables.map(bill => {
+          const isMatch = stringIds.includes(String(bill._id));
+          console.log(bill._id, isMatch, stringIds);
+          return isMatch ? { ...bill, status: 'paid' } : bill;
+        });
         set({ billTables: updatedBillTables });
       },
       paidBills: [],
@@ -194,11 +197,11 @@ export const useAppStore = create<AppStore>()(
       setAllInUseTables: (tables) => {
         set({ inUseTables: tables })
       },
-      setAllPaidBills:(bills)=>{
-        set({paidBills:bills})
+      setAllPaidBills: (bills) => {
+        set({ paidBills: bills })
       },
-      setAllBillTables:(table)=>{
-        set({billTables:table})
+      setAllBillTables: (table) => {
+        set({ billTables: table })
       },
       setCustomerOnline: async (customer: Customer) => {
         const customers = get().customers || [];
@@ -208,7 +211,7 @@ export const useAppStore = create<AppStore>()(
           await AddCustomer(customer);
         }
       },
-      setCustomerOffline: async(customer: Customer) => {
+      setCustomerOffline: async (customer: Customer) => {
         const customers = get().customers || [];
         if (!customers.some(c => c.name === customer.name)) {
           set({ customers: [...customers, customer] });
@@ -219,7 +222,7 @@ export const useAppStore = create<AppStore>()(
             body: customer
           });
         }
-      
+
       }
     }),
 

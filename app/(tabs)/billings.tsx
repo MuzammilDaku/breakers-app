@@ -8,10 +8,9 @@ export default function Billing() {
     const [searchQuery, setSearchQuery] = useState('');
     const billTables = useAppStore((state) => state?.billTables)?.filter((item) => item?.status !== "paid");
     const mergedBillTables = billTables?.reduce((acc, curr) => {
-        const existing:any = acc?.find(item => item?.loser?.toLowerCase() === curr?.loser?.toLowerCase());
+        const existing: any = acc?.find(item => item?.loser?.toLowerCase() === curr?.loser?.toLowerCase());
         if (existing) {
             existing.total_bill += curr?.total_bill;
-            // Optionally, update date to latest
             if (curr?.date && (!existing?.date || curr?.date > existing?.date)) {
                 existing.date = curr?.date;
             }
@@ -37,7 +36,7 @@ export default function Billing() {
                     />
                 </View>
                 <View style={styles.tableContainer}>
-                    <DataTable style={{ backgroundColor: '#fff',borderRadius: 10 }}>
+                    <DataTable style={{ backgroundColor: '#fff', borderRadius: 10 }}>
                         <DataTable.Header>
                             <DataTable.Title >Cutomer Name</DataTable.Title>
                             <DataTable.Title >Time</DataTable.Title>
@@ -53,9 +52,11 @@ export default function Billing() {
                                     <DataTable.Cell textStyle={{ marginLeft: 20 }}>{String(item.total_bill)}</DataTable.Cell>
                                     <DataTable.Cell>
                                         <TouchableOpacity onPress={() => {
-                                           router.navigate({pathname:'/billing',params:{
-                                            customer_name:item.loser
-                                           }})
+                                            router.navigate({
+                                                pathname: '/billing', params: {
+                                                    customer_name: item.loser
+                                                }
+                                            })
                                         }}>
                                             <Text style={{ color: 'blue' }}>Print & Pay Bill</Text>
                                         </TouchableOpacity>
