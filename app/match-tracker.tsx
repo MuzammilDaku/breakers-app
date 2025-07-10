@@ -311,6 +311,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         borderColor: "#eeeff3",
         borderWidth: 1,
+        color: "black",
     },
     dropdown: {
         position: "absolute",

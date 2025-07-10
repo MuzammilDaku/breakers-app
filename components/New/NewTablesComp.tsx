@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import TablePills from "./TablePills";
 import Tables from "./Tables";
 export default function NewTablesComp() {
@@ -9,12 +9,12 @@ export default function NewTablesComp() {
 
     },[])
     return (
-        <View style={styles.conatiner}>
+        <ScrollView style={styles.conatiner}>
             <View style={{ marginHorizontal: 15 }}>
             <TablePills selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter}/>
             <Tables selectedFilter={selectedFilter}/>
             </View>
-        </View>
+        </ScrollView>
     )
 }
 

@@ -1,7 +1,7 @@
 import { useAppStore } from "@/context/appStore";
 import { router } from "expo-router";
 import { useState } from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { DataTable, Searchbar } from "react-native-paper";
 
 export default function Billing() {
@@ -25,7 +25,7 @@ export default function Billing() {
     );
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <View style={{ marginHorizontal: 20 }}>
                 <View style={styles.searchContainer}>
                     <Searchbar
@@ -67,7 +67,7 @@ export default function Billing() {
                     </DataTable>
                 </View>
             </View>
-        </View>
+        </ScrollView>
     )
 };
 

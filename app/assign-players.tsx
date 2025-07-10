@@ -248,7 +248,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         fontSize: 14,
         borderColor: "#eeeff3",
-        borderWidth: 1
+        borderWidth: 1,
+        color:"black"
     },
     tabContainer: {
         display: 'flex',

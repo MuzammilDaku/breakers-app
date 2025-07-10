@@ -1,6 +1,14 @@
-import { useAppStore } from '@/context/appStore';
+import { Table, useAppStore } from '@/context/appStore';
+import { useOfflineStore } from '@/context/offlineStore';
+import { baseUrl } from '@/services/base';
+import { DeleteTable } from '@/services/table';
+import { getRandomId } from '@/services/utilities/getRandomId';
+import { isInternetConnected } from '@/services/utilities/isInternetConnected';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, DataTable } from 'react-native-paper';
 
 const statsData = [
     {
@@ -20,10 +28,7 @@ const periods = ['today', 'week', 'month', 'all'] as const;
 
 export default function Dashboard() {
     const [selectedPeriod, setSelectedPeriod] = useState<typeof periods[number]>('today');
-    console.log(selectedPeriod)
-    // const { history } = useAppStore()
-    const history = useAppStore((state)=>state.paidBills)
-    // console.log(history)
+    const history = useAppStore((state) => state.paidBills)
     const getHistoryByDate = (period: typeof periods[number]) => {
         const now = new Date();
         let startDate: Date;
@@ -73,10 +78,39 @@ export default function Dashboard() {
         }
     };
 
+    const tables = useAppStore((state) => state.tables)
+    const deleteTable = useAppStore((state) => state.deleteTable)
+    const addToQueue = useOfflineStore((state) => state.addToQueue)
+
+
+    const handleDelete = async (table: Table) => {
+        if (!table._id) return;
+        try {
+            const isConnected = await isInternetConnected();
+
+            if (isConnected) {
+                await DeleteTable({ _id: table._id })
+            }
+            else {
+                await addToQueue({
+                    method: "DELETE",
+                    url: baseUrl + '/table',
+                    body: { _id: table._id },
+                    id: getRandomId()
+                })
+            }
+            deleteTable(table)
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
+
+
     return (
         <>
-            <ScrollView contentContainerStyle={styles.container}>
-                <Text style={styles.header}>Dashboard</Text>
+            <ScrollView style={styles.container}>
+                {/* <Text style={styles.header}>Dashboard</Text> */}
                 <View style={styles.periodSelector}>
                     {periods.map(period => (
                         <TouchableOpacity
@@ -102,21 +136,82 @@ export default function Dashboard() {
                     <View style={styles.statBox}>
                         <Text style={styles.statTitle}>Total Sales</Text>
                         <Text style={styles.statValue}>
-                           Rs {stats.sales[selectedPeriod]}
+                            Rs {stats.sales[selectedPeriod]}
                         </Text>
                     </View>
                     <View style={styles.statBox}>
                         <Text style={styles.statTitle}>Total Frames Played</Text>
                         <Text style={styles.statValue}>
-                             {stats.frames[selectedPeriod]}
+                            {stats.frames[selectedPeriod]}
                         </Text>
                     </View>
 
                     <View style={styles.statBox}>
                         <Text style={styles.statTitle}>Received Amount</Text>
                         <Text style={styles.statValue}>
-                         Rs {stats.received[selectedPeriod]}
+                            Rs {stats.received[selectedPeriod]}
                         </Text>
+                    </View>
+                </View>
+
+                <View style={{ marginVertical: 10 }}>
+                    <View style={{ padding: 16 }}>
+                        {/* Title + Add Button */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Tables</Text>
+                            <Button
+                                mode="contained"
+                                onPress={() => {
+                                    router.navigate("/create-table")
+                                }}
+                                style={{ backgroundColor: '#475ba3' }}
+                                labelStyle={{ color: 'white' }}
+                            >
+                                Add Table
+                            </Button>
+                        </View>
+                        <DataTable style={{ backgroundColor: '#fff', borderRadius: 10 }}>
+                            <DataTable.Header>
+                                <DataTable.Title><Text style={{ fontSize: 16 }}>Table Name</Text></DataTable.Title>
+                                <DataTable.Title ><Text style={{ fontSize: 16 }}>Actions</Text></DataTable.Title>
+                            </DataTable.Header>
+                            <FlatList data={tables} keyExtractor={(item) => item._id} renderItem={({ item }) => {
+                                return (
+                                    <DataTable.Row>
+                                        <DataTable.Cell>
+                                            <Text style={{ fontSize: 16 }}>{item.name}</Text>
+                                        </DataTable.Cell>
+                                        <DataTable.Cell>
+                                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                <TouchableOpacity
+                                                    style={{ marginRight: 10 }}
+                                                    onPress={() => {
+                                                        router.navigate({ pathname: "/create-table", params: { table: JSON.stringify(item) } });
+                                                    }}
+                                                >
+                                                    <Ionicons name="create-outline" color="blue" size={20} />
+                                                </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        Alert.alert(
+                                                            "Delete Table",
+                                                            "Are you sure you want to delete this table?",
+                                                            [
+                                                                { text: "Cancel", style: "cancel" },
+                                                                { text: "Delete", style: "destructive", onPress: () => handleDelete(item) },
+                                                            ]
+                                                        );
+                                                    }}
+                                                >
+                                                    <Ionicons name="trash-outline" color="blue" size={20} />
+                                                </TouchableOpacity>
+                                            </View>
+                                        </DataTable.Cell>
+
+                                    </DataTable.Row>
+                                )
+                            }} />
+                        </DataTable>
                     </View>
                 </View>
 
@@ -133,7 +228,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
     },
     header: {
-        fontSize: 28,
+        fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 18,
         color: '#222',

@@ -43,7 +43,7 @@ export default function Billing() {
                 created_by: user._id,
                 total_bill: totalBill,
                 table_names: tablesName,
-                game_names: gameNames,
+                game_type: gameNames,
                 game_mode: gameModes,
                 _id: getRandomId(),
                 date: getCurrentPakistaniTime()
@@ -189,7 +189,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         fontSize: 14,
         borderColor: "#eeeff3",
-        borderWidth: 1
+        borderWidth: 1,
+        color:"black"
     },
     container: {
         marginVertical: 20,
