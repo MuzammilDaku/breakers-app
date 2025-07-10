@@ -28,6 +28,9 @@ export default function MatchTracker() {
     const user = useAppStore((state) => state.user);
 
     const setBillTables = useAppStore((state) => state.setBillTables);
+    const setCustomerOffline = useAppStore((state) => state.setCustomerOffline);
+    const setCustomerOnline = useAppStore((state) => state.setCustomerOnline);
+
     const deleteInUseTable = useAppStore((state) => state.deleteInUseTable);
 
     const [isDisabled, setIsDisabled] = useState(true);
@@ -124,14 +127,16 @@ export default function MatchTracker() {
         const isConnected = await isInternetConnected();
 
         if (isConnected) {
+            setCustomerOnline({ name: loser, date: getCurrentPakistaniTime(), _id: getRandomId() });
             await DeleteInUseTable(inUseTable?._id)
             await AddGameHistory(payload)
         }
         else {
+            setCustomerOffline({ name: loser, date: getCurrentPakistaniTime(), _id: getRandomId() });
             addToQueue({
-                method:"DELETE",
-                url:baseUrl+`/table/in-use?id=${inUseTable?._id}`,
-                id:getRandomId()
+                method: "DELETE",
+                url: baseUrl + `/table/in-use?id=${inUseTable?._id}`,
+                id: getRandomId()
             })
             addToQueue({
                 method: "POST",

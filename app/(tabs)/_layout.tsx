@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 
 import { useAppStore } from '@/context/appStore';
 import { FontAwesome6 } from '@expo/vector-icons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function TabLayout() {
@@ -31,20 +32,38 @@ export default function TabLayout() {
     <Tabs
     >
       <Tabs.Screen
-      name="index"
-      options={{
-        title: 'Billing',
-        tabBarIcon: ({ color }) => <FontAwesome6 name="money-bill" size={24} color={color} /> ,
-      }}
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color }) => <FontAwesome6 name="house" size={24} color={color} />,
+        }}
       />
 
-         <Tabs.Screen
-      name="dashboard"
-      options={{
-        title: 'Dashboard',
-        tabBarIcon: ({ color }) => <MaterialCommunityIcons name="view-dashboard-outline" size={24} color={color} />,
-      }}
+       <Tabs.Screen
+        name="billings"
+        options={{
+          title: 'Billing',
+          tabBarIcon: ({ color }) => <FontAwesome6 name="money-bill" size={24} color={color} />,
+        }}
       />
+
+       <Tabs.Screen
+        name="manual-billing"
+        options={{
+          title: 'Manual Billing',
+          tabBarIcon: ({ color }) => <FontAwesome name="pencil" size={24} color={color} /> ,
+        }}
+      />
+
+      <Tabs.Screen
+        name="dashboard"
+        options={{
+          title: 'Dashboard',
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="view-dashboard-outline" size={24} color={color} />,
+        }}
+      />
+
+     
     </Tabs>
   );
 }
