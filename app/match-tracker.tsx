@@ -19,7 +19,7 @@ import {
     TouchableWithoutFeedback,
     View
 } from "react-native";
-import { Provider, Text, TextInput } from "react-native-paper";
+import { Dialog, Portal, Provider, Text, TextInput } from "react-native-paper";
 
 
 export default function MatchTracker() {
@@ -106,6 +106,102 @@ export default function MatchTracker() {
     const addToQueue = useOfflineStore((state) => state.addToQueue)
 
     const [isLoading, setIsLoading] = useState(false);
+
+
+
+
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
+
+    useEffect(() => {
+        if (
+            inUseTable?.game_type === "Century" &&
+            inUseTable?.date &&
+            timerRunning
+        ) {
+            const updateTimer = () => {
+                const start = dayjs.tz(inUseTable.date, 'YYYY-MM-DD HH:mm:ss', 'Asia/Karachi');
+                const now = dayjs.tz(getCurrentPakistaniTime(), 'YYYY-MM-DD HH:mm:ss', 'Asia/Karachi');
+
+                const secondsElapsed = now.diff(start, 'second'); // ✅ Accurate
+                setElapsedTime(secondsElapsed);
+            };
+
+            updateTimer(); // First run
+            const interval = setInterval(updateTimer, 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [inUseTable, timerRunning]);
+
+    const hours = Math.floor(elapsedTime / 3600)
+        .toString()
+        .padStart(2, "0");
+    const minutes = Math.floor((elapsedTime % 3600) / 60)
+        .toString()
+        .padStart(2, "0");
+    const seconds = (elapsedTime % 60).toString().padStart(2, "0");
+
+
+    useEffect(() => {
+        if (!winner || !loser) {
+            setIsDisabled(true);
+        }
+        else setIsDisabled(false)
+    }, [winner, loser])
+
+
+    const [isLoadingOneMoreGame, setIsLoadingOneMoreGame] = useState(false);
+    // const
+
+    const addOneMoreGame = async () => {
+        console.log(inUseTable)
+
+        // setIsLoadingOneMoreGame(true)
+        // setTimerRunning(false);
+        // const payload: UserBillTable = {
+        //     _id: getRandomId(),
+        //     inUseTable: inUseTable,
+        //     winner: winner,
+        //     loser: loser,
+        //     total_bill: totalBill(),
+        //     game_type: inUseTable.game_type,
+        //     created_by: user?._id,
+        //     date: getCurrentPakistaniTime()
+        // }
+        // if (inUseTable.game_type == "Century") {
+        //     payload.total_time = elapsedTime;
+        // }
+        // else payload.total_frame = 1;
+
+        // const isConnected = await isInternetConnected();
+
+        // if (isConnected) {
+        //     setCustomerOnline({ name: loser, date: getCurrentPakistaniTime(), _id: getRandomId() });
+        //     await DeleteInUseTable(inUseTable?._id)
+        //     await AddGameHistory(payload)
+
+        // }
+        // else {
+        //     setCustomerOffline({ name: loser, date: getCurrentPakistaniTime(), _id: getRandomId() });
+        //     addToQueue({
+        //         method: "DELETE",
+        //         url: baseUrl + `/table/in-use?id=${inUseTable?._id}`,
+        //         id: getRandomId()
+        //     })
+        //     addToQueue({
+        //         method: "POST",
+        //         url: baseUrl + '/table/game-history',
+        //         body: payload,
+        //         id: getRandomId()
+        //     })
+        // }
+        // setBillTables(payload);
+        // deleteInUseTable(inUseTable);
+        // setTimerRunning(true);
+        // setIsLoading(false)
+    }
+
     const handleEndGame = async () => {
         setIsLoading(true)
         setTimerRunning(false);
@@ -156,51 +252,37 @@ export default function MatchTracker() {
         setIsLoading(false)
     };
 
+     const [visible, setVisible] = useState(true);
 
-    dayjs.extend(utc);
-    dayjs.extend(timezone);
-
-    useEffect(() => {
-        if (
-            inUseTable?.game_type === "Century" &&
-            inUseTable?.date &&
-            timerRunning
-        ) {
-            const updateTimer = () => {
-                const start = dayjs.tz(inUseTable.date, 'YYYY-MM-DD HH:mm:ss', 'Asia/Karachi');
-                const now = dayjs.tz(getCurrentPakistaniTime(), 'YYYY-MM-DD HH:mm:ss', 'Asia/Karachi');
-
-                const secondsElapsed = now.diff(start, 'second'); // ✅ Accurate
-                setElapsedTime(secondsElapsed);
-            };
-
-            updateTimer(); // First run
-            const interval = setInterval(updateTimer, 1000);
-
-            return () => clearInterval(interval);
-        }
-    }, [inUseTable, timerRunning]);
-
-    const hours = Math.floor(elapsedTime / 3600)
-        .toString()
-        .padStart(2, "0");
-    const minutes = Math.floor((elapsedTime % 3600) / 60)
-        .toString()
-        .padStart(2, "0");
-    const seconds = (elapsedTime % 60).toString().padStart(2, "0");
-
-
-    useEffect(() => {
-        if (!winner || !loser) {
-            setIsDisabled(true);
-        }
-        else setIsDisabled(false)
-    }, [winner, loser])
-
+  const hideDialog = () => setVisible(false);
     return (
         <Provider>
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                
                 <View style={styles.container}>
+                    <Portal>
+                        <Dialog visible={visible} onDismiss={hideDialog}>
+                            <Dialog.Title>Select Game Type</Dialog.Title>
+                            <Dialog.Content>
+                                <TouchableOpacity style={{ marginVertical: 5 }}>
+                                    <Text>One Red</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={{ marginVertical: 5 }}>
+                                    <Text>Six Red</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={{ marginVertical: 5 }}>
+                                    <Text>Ten Red</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={{ marginVertical: 5 }}>
+                                    <Text>Fifteen Red</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={{ marginVertical: 5 }}>
+                                    <Text>Century</Text>
+                                </TouchableOpacity>
+                            </Dialog.Content>
+                        </Dialog>
+                </Portal>
+
                     <View style={{ marginHorizontal: 25 }}>
                         <View style={{ flexDirection: "row", width: "100%" }}>
                             {/* Winner Field */}
@@ -267,7 +349,7 @@ export default function MatchTracker() {
 
                             </View>}
                         <View style={styles.btnSecondary}>
-                            <TouchableOpacity disabled={isDisabled}>
+                            <TouchableOpacity disabled={isDisabled} onPress={addOneMoreGame}>
                                 <Text style={styles.btnSecondaryText}>
                                     Add One More Game
                                 </Text>

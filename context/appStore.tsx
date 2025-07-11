@@ -90,7 +90,7 @@ export interface PaidBill {
   _id: string;
   game_mode: string[]
   time_played?: number;
-  game_names: string[];
+  game_type: string[];
   table_names: string[]
 }
 

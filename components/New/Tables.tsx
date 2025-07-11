@@ -3,7 +3,7 @@ import { useOfflineStore } from "@/context/offlineStore";
 import { GetTables } from "@/services/table";
 import { router } from "expo-router";
 import { useEffect } from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Tables(props: { selectedFilter: string }) {
     // const { tables, setTables, user, inUseTables } = useAppStore();
@@ -66,12 +66,10 @@ export default function Tables(props: { selectedFilter: string }) {
 
     return (
         <View style={styles.container}>
-            <FlatList
-                data={filteredTables()}
-                keyExtractor={item => item._id}
-                renderItem={({ item }) => {
-                    return (
+           {tables?.map((item)=>{
+               return (
                         <TouchableOpacity
+                        key={item._id   }
                             onPress={() => {
                                 const status = gameModeCheck(item);
                                 const route = status === "Free" ? "/assign-players" : "/match-tracker";
@@ -96,8 +94,7 @@ export default function Tables(props: { selectedFilter: string }) {
                             }
                         </TouchableOpacity>
                     )
-                }}
-            />
+           })}
         </View>
     )
 }
