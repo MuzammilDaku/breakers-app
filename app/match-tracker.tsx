@@ -1,7 +1,7 @@
 import { useAppStore, UserBillTable } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
 import { baseUrl } from "@/services/base";
-import { AddGameHistory, DeleteInUseTable } from "@/services/table";
+import { AddGameHistory, AddInUseTable, DeleteInUseTable } from "@/services/table";
 import { getCurrentPakistaniTime } from "@/services/utilities/getPakistaniTime";
 import { getRandomId } from "@/services/utilities/getRandomId";
 import { isInternetConnected } from "@/services/utilities/isInternetConnected";
@@ -154,53 +154,7 @@ export default function MatchTracker() {
     const [isLoadingOneMoreGame, setIsLoadingOneMoreGame] = useState(false);
     // const
 
-    const addOneMoreGame = async () => {
-        console.log(inUseTable)
 
-        // setIsLoadingOneMoreGame(true)
-        // setTimerRunning(false);
-        // const payload: UserBillTable = {
-        //     _id: getRandomId(),
-        //     inUseTable: inUseTable,
-        //     winner: winner,
-        //     loser: loser,
-        //     total_bill: totalBill(),
-        //     game_type: inUseTable.game_type,
-        //     created_by: user?._id,
-        //     date: getCurrentPakistaniTime()
-        // }
-        // if (inUseTable.game_type == "Century") {
-        //     payload.total_time = elapsedTime;
-        // }
-        // else payload.total_frame = 1;
-
-        // const isConnected = await isInternetConnected();
-
-        // if (isConnected) {
-        //     setCustomerOnline({ name: loser, date: getCurrentPakistaniTime(), _id: getRandomId() });
-        //     await DeleteInUseTable(inUseTable?._id)
-        //     await AddGameHistory(payload)
-
-        // }
-        // else {
-        //     setCustomerOffline({ name: loser, date: getCurrentPakistaniTime(), _id: getRandomId() });
-        //     addToQueue({
-        //         method: "DELETE",
-        //         url: baseUrl + `/table/in-use?id=${inUseTable?._id}`,
-        //         id: getRandomId()
-        //     })
-        //     addToQueue({
-        //         method: "POST",
-        //         url: baseUrl + '/table/game-history',
-        //         body: payload,
-        //         id: getRandomId()
-        //     })
-        // }
-        // setBillTables(payload);
-        // deleteInUseTable(inUseTable);
-        // setTimerRunning(true);
-        // setIsLoading(false)
-    }
 
     const handleEndGame = async () => {
         setIsLoading(true)
@@ -252,36 +206,102 @@ export default function MatchTracker() {
         setIsLoading(false)
     };
 
-     const [visible, setVisible] = useState(true);
+    const [visible, setVisible] = useState(false);
 
-  const hideDialog = () => setVisible(false);
+    const hideDialog = () => setVisible(false);
+
+    const addOneMoreGame = async (value: string) => {
+        // console.log(inUseTable.game_type)
+        setVisible(false);
+        setIsLoadingOneMoreGame(true)
+        setIsDisabled(true)
+        const payload: UserBillTable = {
+            _id: getRandomId(),
+            inUseTable: inUseTable,
+            winner: winner,
+            loser: loser,
+            total_bill: totalBill(),
+            game_type: inUseTable.game_type,
+            created_by: user?._id,
+            date: getCurrentPakistaniTime()
+        }
+
+        if (inUseTable.game_type == "Century") {
+            payload.total_time = elapsedTime;
+        }
+        else payload.total_frame = 1;
+
+        const newTable = { ...inUseTable, game_type: value, date: getCurrentPakistaniTime(), _id: getRandomId() };
+        const isConnected = await isInternetConnected();
+        if (isConnected) {
+            await AddGameHistory(payload);
+            setCustomerOnline({ name: loser, date: getCurrentPakistaniTime(), _id: getRandomId() });
+            setBillTables(payload);
+            useAppStore.getState().setInUseTables(newTable);
+            await AddInUseTable(newTable);
+            await DeleteInUseTable(inUseTable?._id);
+            deleteInUseTable(inUseTable);
+        }
+        else {
+            setCustomerOffline({ name: loser, date: getCurrentPakistaniTime(), _id: getRandomId() });
+            addToQueue({
+                method: "POST",
+                url: baseUrl + '/table/game-history',
+                body: payload,
+                id: getRandomId()
+            })
+            addToQueue({
+                method: "DELETE",
+                url: baseUrl + `/table/in-use?id=${inUseTable?._id}`,
+                id: getRandomId()
+            })
+            addToQueue({
+                method: "POST",
+                url: baseUrl + `/table/in-use`,
+                body: payload,
+                id: getRandomId()
+            })
+            useAppStore.getState().setInUseTables(newTable);
+            setBillTables(payload);
+            deleteInUseTable(inUseTable);
+        }
+        setIsLoadingOneMoreGame(false);
+        setIsDisabled(false)
+        setTimerRunning(true);
+        setLoser("");
+        setWinner("");
+        router.navigate({ pathname: '/match-tracker', params: { table_id: table._id } })
+    }
+
     return (
         <Provider>
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-                
+
                 <View style={styles.container}>
                     <Portal>
                         <Dialog visible={visible} onDismiss={hideDialog}>
                             <Dialog.Title>Select Game Type</Dialog.Title>
                             <Dialog.Content>
-                                <TouchableOpacity style={{ marginVertical: 5 }}>
-                                    <Text>One Red</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={{ marginVertical: 5 }}>
-                                    <Text>Six Red</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={{ marginVertical: 5 }}>
-                                    <Text>Ten Red</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={{ marginVertical: 5 }}>
-                                    <Text>Fifteen Red</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={{ marginVertical: 5 }}>
-                                    <Text>Century</Text>
-                                </TouchableOpacity>
+                                <View>
+                                    <TouchableOpacity style={[styles.btnPrimary, { marginVertical: 8 }]} activeOpacity={0.8} onPress={() => addOneMoreGame("One Red")}>
+                                        <Text style={styles.btnPrimaryText}>One Red</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.btnPrimary, { marginVertical: 8 }]} activeOpacity={0.8} onPress={() => addOneMoreGame("Six Red")}>
+                                        <Text style={styles.btnPrimaryText}>Six Red</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.btnPrimary, { marginVertical: 8 }]} activeOpacity={0.8} onPress={() => addOneMoreGame("Ten Red")}>
+                                        <Text style={styles.btnPrimaryText}>Ten Red</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.btnPrimary, { marginVertical: 8 }]} activeOpacity={0.8} onPress={() => addOneMoreGame("Fifteen Red")}>
+                                        <Text style={styles.btnPrimaryText}>Fifteen Red</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.btnPrimary, { marginVertical: 8 }]} activeOpacity={0.8} onPress={() => addOneMoreGame("Century")}>
+                                        <Text style={styles.btnPrimaryText}>Century</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </Dialog.Content>
                         </Dialog>
-                </Portal>
+                    </Portal>
 
                     <View style={{ marginHorizontal: 25 }}>
                         <View style={{ flexDirection: "row", width: "100%" }}>
@@ -349,9 +369,9 @@ export default function MatchTracker() {
 
                             </View>}
                         <View style={styles.btnSecondary}>
-                            <TouchableOpacity disabled={isDisabled} onPress={addOneMoreGame}>
+                            <TouchableOpacity disabled={isDisabled} onPress={() => setVisible(true)}>
                                 <Text style={styles.btnSecondaryText}>
-                                    Add One More Game
+                                    {isLoadingOneMoreGame ? <ActivityIndicator color="black" /> : "Add One More Game"}
                                 </Text>
                             </TouchableOpacity>
                         </View>
