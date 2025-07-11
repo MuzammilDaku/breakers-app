@@ -4,7 +4,7 @@
     "slug": "Breakers",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/adaptive-icon.png",
     "scheme": "snookerclub",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,7 +14,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo.png"
+        "foregroundImage": "./assets/images/adaptive-icon.png"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.muzammildaku.SnookerClub"
@@ -32,7 +32,7 @@
           "image": "./assets/images/splashscreen.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#014421"
         }
       ],
       "expo-web-browser",

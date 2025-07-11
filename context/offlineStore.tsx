@@ -1,12 +1,5 @@
-import {
-  GetCustomers,
-  GetGameHistory,
-  GetHistory,
-  GetInUseTables,
-} from "@/services/table";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
-import { useAppStore } from "./appStore";
 
 type OfflineApiCall = {
   id: string;
@@ -22,6 +15,8 @@ type OfflineStore = {
   hasLoaded: boolean;
   addToQueue: (call: OfflineApiCall) => void;
   syncQueue: () => Promise<void>;
+  loadData: string;
+  setLoadData: (data: string) => void;
 };
 
 const QUEUE_KEY = "offline_api_queue";
@@ -51,7 +46,8 @@ export const useOfflineStore = create<OfflineStore>((set, get) => {
       set({ queue: updatedQueue });
       persistQueue(updatedQueue);
     },
-
+    loadData: "load",
+    setLoadData: (data: string) => set({ loadData: data }),
     syncQueue: async () => {
       const queue = [...get().queue];
       if (queue.length === 0) return;
@@ -84,39 +80,15 @@ export const useOfflineStore = create<OfflineStore>((set, get) => {
       const remaining = queue.filter(
         (item) => !successfulIds.includes(item.id)
       );
-      if (remaining.length === 0) {
-        const user = useAppStore.getState().user;
-        const setAllCustomers = useAppStore.getState().setAllCustomers;
-        const setAllInUseTables = useAppStore.getState().setAllInUseTables;
-        const setAllPaidBills = useAppStore.getState().setAllPaidBills;
-        const setAllBillTables = useAppStore.getState().setAllBillTables;
-        async function GetCustomer() {
-          const res = await GetCustomers(user?._id);
-          setAllCustomers(res);
-        }
 
-        async function GetInUseTable() {
-          const res = await GetInUseTables(user?._id);
-          setAllInUseTables(res);
-        }
-
-        async function GetPaidBills() {
-          const res = await GetHistory(user?._id);
-          setAllPaidBills(res);
-        }
-
-        async function GetGamesHistory() {
-          const res = await GetGameHistory(user?._id);
-          setAllBillTables(res);
-        }
-        GetCustomer();
-        GetInUseTable();
-        GetPaidBills();
-        GetGamesHistory();
-      }
-      // console.log("remaining", remaining);
       set({ queue: remaining, syncing: false });
       persistQueue(remaining);
+      // console.log("Sync complete. Remaining items:");
+      if (remaining.length === 0) {
+        if (get().loadData === "load") {
+          set({ loadData: "load1" });
+        } else set({ loadData: "load" });
+      }
     },
   };
 });

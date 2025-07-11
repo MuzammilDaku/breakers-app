@@ -9,7 +9,7 @@ export const isInternetConnected = async (
   } = {}
 ): Promise<boolean> => {
   const {
-    timeout = 15000,
+    timeout = 5000, // 5 seconds
     minFailureDelay = 10000,
     checkEndpoint = "https://example.com",
   } = options;
