@@ -2,9 +2,9 @@ import { useAppStore, UserBillTable } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
 import { baseUrl } from "@/services/base";
 import {
-    AddGameHistory,
-    AddInUseTable,
-    DeleteInUseTable,
+  AddGameHistory,
+  AddInUseTable,
+  DeleteInUseTable,
 } from "@/services/table";
 import { getCurrentPakistaniTime } from "@/services/utilities/getPakistaniTime";
 import { getRandomId } from "@/services/utilities/getRandomId";
@@ -16,12 +16,12 @@ import utc from "dayjs/plugin/utc";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Keyboard,
-    StyleSheet,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  ActivityIndicator,
+  Keyboard,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import { Dialog, Portal, Provider, Text, TextInput } from "react-native-paper";
 
@@ -258,8 +258,10 @@ export default function MatchTracker() {
       });
       setBillTables(payload);
       useAppStore.getState().setInUseTables(newTable);
-      await AddInUseTable(newTable);
-      await DeleteInUseTable(inUseTable?._id);
+      const add = await AddInUseTable(newTable);
+      console.log("Add In Use Table Response: ", add);
+      const del = await DeleteInUseTable(inUseTable?._id);
+      console.log("Delete In Use Table Response: ", del);
       deleteInUseTable(inUseTable);
     } else {
       setCustomerOffline({
@@ -273,6 +275,7 @@ export default function MatchTracker() {
         body: payload,
         id: getRandomId(),
       });
+
       addToQueue({
         method: "DELETE",
         url: baseUrl + `/table/in-use?id=${inUseTable?._id}`,
@@ -281,7 +284,7 @@ export default function MatchTracker() {
       addToQueue({
         method: "POST",
         url: baseUrl + `/table/in-use`,
-        body: payload,
+        body: newTable,
         id: getRandomId(),
       });
       useAppStore.getState().setInUseTables(newTable);

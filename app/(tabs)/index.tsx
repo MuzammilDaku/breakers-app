@@ -45,26 +45,22 @@ export default function HomeScreen() {
   async function GetCustomer() {
     const res = await GetCustomers(user?._id);
     setAllCustomers(res)
-  }
+  };
+  
   async function GetInUseTable() {
-    try {
       const res = await GetInUseTables(user?._id);
-      console.log("res",res)
       setAllInUseTables(res);
-    } catch (error) {
-      // console.log(error)
-    }
+  };
 
-  }
   async function GetPaidBills() {
     const res = await GetHistory(user?._id);
     setAllPaidBills(res)
-  }
+  };
 
   async function GetGamesHistory() {
     const res = await GetGameHistory(user?._id);
     setAllBillTables(res);
-  }
+  };
 
   useEffect(() => {
     GetCustomer();
