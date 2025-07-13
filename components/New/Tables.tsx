@@ -68,7 +68,7 @@ export default function Tables(props: { selectedFilter: string }) {
 
   return (
     <View style={styles.container}>
-      {tables?.map((item) => {
+      {filteredTables()?.map((item) => {
         return (
           <TouchableOpacity
             key={item._id}

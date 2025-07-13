@@ -1,4 +1,4 @@
-import { useAppStore } from "@/context/appStore";
+import { PaidBill, useAppStore } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
 import { baseUrl } from "@/services/base";
 import { AddCheckIn } from "@/services/table";
@@ -7,16 +7,15 @@ import { getRandomId } from "@/services/utilities/getRandomId";
 import { isInternetConnected } from "@/services/utilities/isInternetConnected";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    ToastAndroid,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { MultiSelect } from "react-native-element-dropdown";
 
 const types = [
   { label: "One Red", value: "One Red" },
@@ -46,7 +45,7 @@ export default function ManualBilling() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const [billInfo, setBillInfo] = useState({
+  const [billInfo, setBillInfo] = useState<PaidBill>({
     customer_name: "",
     game_type: [],
     game_mode: [],
@@ -55,6 +54,7 @@ export default function ManualBilling() {
     created_by: user?._id,
     date: getCurrentPakistaniTime(),
     _id: getRandomId(),
+    bill_type: "manual",
   });
 
   const handleChange = (field: string, value: any) => {
@@ -166,7 +166,7 @@ export default function ManualBilling() {
             }}
           />
         </View>
-        <View style={styles.inputContainer}>
+        {/* <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Game Type</Text>
           <MultiSelect
             style={styles.dropdown}
@@ -212,7 +212,7 @@ export default function ManualBilling() {
             }}
             selectedStyle={styles.selectedStyle}
           />
-        </View>
+        </View> */}
 
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Total Bill</Text>

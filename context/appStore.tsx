@@ -91,7 +91,8 @@ export interface PaidBill {
   game_mode: string[]
   time_played?: number;
   game_type: string[];
-  table_names: string[]
+  table_names: string[];
+  bill_type?:string
 }
 
 interface AppStore {

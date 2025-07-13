@@ -9,14 +9,14 @@ import React, { useState } from "react";
 import { baseUrl } from "@/services/base";
 import { getRandomId } from "@/services/utilities/getRandomId";
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const AddTableComp: React.FC = () => {
@@ -184,6 +184,7 @@ const AddTableComp: React.FC = () => {
             style={styles.icon}
           />
           <TextInput
+            placeholderTextColor={"black"}
             style={styles.input}
             placeholder="Table Name"
             value={tableName}
@@ -200,6 +201,7 @@ const AddTableComp: React.FC = () => {
           <TextInput
             style={styles.input}
             placeholder="Century Rate"
+            placeholderTextColor={"black"}
             value={centuryRateInput}
             onChangeText={(text) => {
               const numeric = text.replace(/[^0-9]/g, "");
@@ -218,6 +220,7 @@ const AddTableComp: React.FC = () => {
           />
           <TextInput
             style={styles.input}
+            placeholderTextColor={"black"}
             placeholder="One Red Rate"
             value={oneRedRateInput}
             onChangeText={(text) => {
@@ -238,6 +241,7 @@ const AddTableComp: React.FC = () => {
           />
           <TextInput
             style={styles.input}
+            placeholderTextColor={"black"}
             placeholder="Six Red Rate"
             value={sixRedRateInput}
             onChangeText={(text) => {
@@ -257,6 +261,7 @@ const AddTableComp: React.FC = () => {
           />
           <TextInput
             style={styles.input}
+            placeholderTextColor={"black"}
             placeholder="Ten Red Rate"
             value={tenRedRateInput}
             onChangeText={(text) => {
@@ -276,6 +281,7 @@ const AddTableComp: React.FC = () => {
           />
           <TextInput
             style={styles.input}
+            placeholderTextColor={"black"}
             placeholder="Fifteen Red Rate"
             value={fifteenRedRateInput}
             onChangeText={(text) => {
@@ -358,7 +364,9 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 44,
     fontSize: 16,
-    color: "#2d3436",
+    color: "black",
+
+    // Set placeholder text color to black
   },
   button: {
     flexDirection: "row",

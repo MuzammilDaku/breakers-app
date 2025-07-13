@@ -1,22 +1,9 @@
-import { Table, useAppStore } from "@/context/appStore";
+import DashboardPaidBills from "@/components/Dashboard/DashboardPaidBills";
+import DashboardTables from "@/components/Dashboard/DashboardTables";
+import { useAppStore } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
-import { baseUrl } from "@/services/base";
-import { DeleteTable } from "@/services/table";
-import { getRandomId } from "@/services/utilities/getRandomId";
-import { isInternetConnected } from "@/services/utilities/isInternetConnected";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import React, { useState } from "react";
-import {
-  Alert,
-  FlatList,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { Button } from "react-native-paper";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const periods = ["today", "week", "month", "all"] as const;
 
@@ -96,130 +83,157 @@ export default function Dashboard() {
     },
   };
 
-  const handleDelete = async (table: Table) => {
-    if (!table._id) return;
-    try {
-      const isConnected = await isInternetConnected();
+  const [activeTab, setActiveTab] = useState<
+    "dashboard" | "tables" | "paidBills"
+  >("dashboard");
 
-      if (isConnected) {
-        await DeleteTable({ _id: table._id });
-      } else {
-        await addToQueue({
-          method: "DELETE",
-          url: baseUrl + "/table",
-          body: { _id: table._id },
-          id: getRandomId(),
-        });
-      }
-      deleteTable(table);
-    } catch (error) {
-      console.log(error);
+  const renderTabContent = () => {
+    if (activeTab === "dashboard") {
+      return (
+        <View>
+          {/* Period Buttons */}
+          <View style={styles.periodSelector}>
+            {periods?.map((period) => (
+              <TouchableOpacity
+                key={period}
+                style={[
+                  styles.periodButton,
+                  selectedPeriod === period && styles.periodButtonActive,
+                ]}
+                onPress={() => setSelectedPeriod(period)}
+              >
+                <Text
+                  style={[
+                    styles.periodButtonText,
+                    selectedPeriod === period && styles.periodButtonTextActive,
+                  ]}
+                >
+                  {period.charAt(0).toUpperCase() + period.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Stats */}
+          <View style={styles.boxesContainer}>
+            <View style={styles.statBox}>
+              <Text style={styles.statTitle}>Total Sales</Text>
+              <Text style={styles.statValue}>
+                Rs {stats.sales[selectedPeriod]}
+              </Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statTitle}>Total Frames Played</Text>
+              <Text style={styles.statValue}>
+                {stats.frames[selectedPeriod]}
+              </Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statTitle}>Received Amount</Text>
+              <Text style={styles.statValue}>
+                Rs {stats.received[selectedPeriod]}
+              </Text>
+            </View>
+          </View>
+        </View>
+      );
     }
+    if (activeTab === "tables") {
+      return <DashboardTables />;
+    }
+    if (activeTab === "paidBills") {
+      return (
+        <DashboardPaidBills />
+      );
+    }
+    return null;
   };
 
-  const renderItem = ({ item }: { item: Table }) => (
-    <View style={styles.tableRow}>
-      <Text style={styles.tableCell}>{item?.name}</Text>
-      <View style={{ flexDirection: "row" }}>
-        <TouchableOpacity
-          onPress={() => {
-            router.navigate({
-              pathname: "/create-table",
-              params: { table: JSON.stringify(item) },
-            });
-          }}
-        >
-          <Ionicons
-            name="create-outline"
-            color="blue"
-            size={20}
-            style={{ marginRight: 10 }}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert("Delete Table", "Are you sure?", [
-              { text: "Cancel", style: "cancel" },
-              {
-                text: "Delete",
-                style: "destructive",
-                onPress: () => handleDelete(item),
-              },
-            ]);
-          }}
-        >
-          <Ionicons name="trash-outline" color="blue" size={20} />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F6F8FA" }}>
-      <View style={styles.container}>
-        {/* Period Buttons */}
-        <View style={styles.periodSelector}>
-          {periods?.map((period) => (
-            <TouchableOpacity
-              key={period}
-              style={[
-                styles.periodButton,
-                selectedPeriod === period && styles.periodButtonActive,
-              ]}
-              onPress={() => setSelectedPeriod(period)}
-            >
-              <Text
-                style={[
-                  styles.periodButtonText,
-                  selectedPeriod === period && styles.periodButtonTextActive,
-                ]}
-              >
-                {period.charAt(0).toUpperCase() + period.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Stats */}
-        <View style={styles.boxesContainer}>
-          <View style={styles.statBox}>
-            <Text style={styles.statTitle}>Total Sales</Text>
-            <Text style={styles.statValue}>
-              Rs {stats.sales[selectedPeriod]}
-            </Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statTitle}>Total Frames Played</Text>
-            <Text style={styles.statValue}>{stats.frames[selectedPeriod]}</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statTitle}>Received Amount</Text>
-            <Text style={styles.statValue}>
-              Rs {stats.received[selectedPeriod]}
-            </Text>
-          </View>
-        </View>
-
-        {/* Table List Header */}
-        <View style={styles.listHeader}>
-          <Text style={{ fontSize: 20, fontWeight: "bold" }}>Tables</Text>
-          <Button
-            mode="contained"
-            onPress={() => router.navigate("/create-table")}
-            style={{ backgroundColor: "#475ba3" }}
-            labelStyle={{ color: "white" }}
+    <>
+      <View
+        style={{
+          backgroundColor: "#fff",
+          flexDirection: "row",
+          borderRadius: 20,
+          margin: 16,
+          elevation: 2,
+          shadowColor: "#000",
+          shadowOpacity: 0.04,
+          shadowOffset: { width: 0, height: 2 },
+          shadowRadius: 6,
+        }}
+      >
+        <TouchableOpacity
+          style={[
+            {
+              flex: 1,
+              paddingVertical: 14,
+              alignItems: "center",
+              borderRadius: 20,
+            },
+            activeTab === "dashboard" && { backgroundColor: "#1976D2" },
+          ]}
+          onPress={() => setActiveTab("dashboard")}
+        >
+          <Text
+            style={{
+              color: activeTab === "dashboard" ? "#fff" : "#1976D2",
+              fontWeight: "bold",
+              fontSize: 16,
+            }}
           >
-            Add Table
-          </Button>
-        </View>
-        <FlatList
-          data={tables}
-          keyExtractor={(item) => item._id}
-          renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 100 }}
-        />
+            Dashboard
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            {
+              flex: 1,
+              paddingVertical: 14,
+              alignItems: "center",
+              borderRadius: 20,
+            },
+            activeTab === "tables" && { backgroundColor: "#1976D2" },
+          ]}
+          onPress={() => setActiveTab("tables")}
+        >
+          <Text
+            style={{
+              color: activeTab === "tables" ? "#fff" : "#1976D2",
+              fontWeight: "bold",
+              fontSize: 16,
+            }}
+          >
+            Tables
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            {
+              flex: 1,
+              paddingVertical: 14,
+              alignItems: "center",
+              borderRadius: 20,
+            },
+            activeTab === "paidBills" && { backgroundColor: "#1976D2" },
+          ]}
+          onPress={() => setActiveTab("paidBills")}
+        >
+          <Text
+            style={{
+              color: activeTab === "paidBills" ? "#fff" : "#1976D2",
+              fontWeight: "bold",
+              fontSize: 16,
+            }}
+          >
+            Paid Bills
+          </Text>
+        </TouchableOpacity>
       </View>
-    </SafeAreaView>
+
+      {renderTabContent()}
+    </>
   );
 }
 
@@ -254,6 +268,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    marginHorizontal: 20,
   },
   statBox: {
     backgroundColor: "#fff",
@@ -277,25 +292,5 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     color: "#1976D2",
-  },
-  listHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  tableRow: {
-    backgroundColor: "#fff",
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  tableCell: {
-    fontSize: 16,
   },
 });
