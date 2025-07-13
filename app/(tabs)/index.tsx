@@ -110,12 +110,19 @@ export default function HomeScreen() {
         { cancelable: true }
       );
     }
+    else Alert.alert("Bluetooth","No Printer Nearby Founded")
   }
-  useEffect(() => {
-    requestBluetoothPermissions();
-    ScanDevices();
+useEffect(() => {
+  async function initBluetooth() {
+    await requestBluetoothPermissions();
     console.log("Requesting Bluetooth permissions...");
-  }, []);
+    await ScanDevices(); // only run scan after permission is granted
+  }
+
+  initBluetooth();
+}, []);
+
+
 
   return <TablesComp />;
 }

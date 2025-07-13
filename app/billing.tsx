@@ -1,6 +1,7 @@
 import { PaidBill, useAppStore } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
 import { baseUrl } from "@/services/base";
+import { generateBillText, printBill } from "@/services/printer";
 import { AddCheckIn, UpdateGameHistory } from "@/services/table";
 import { getCurrentPakistaniTime } from "@/services/utilities/getPakistaniTime";
 import { getRandomId } from "@/services/utilities/getRandomId";
@@ -8,11 +9,11 @@ import { isInternetConnected } from "@/services/utilities/isInternetConnected";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 
@@ -120,6 +121,7 @@ export default function Billing() {
         }
         setPaidBills(payload);
         addPaidStatus(billIds);
+        await printBill(generateBillText(payload))
         router.navigate("/(tabs)");
         setIsLoading(false);
       }

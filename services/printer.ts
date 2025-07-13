@@ -1,3 +1,4 @@
+import { PaidBill } from '@/context/appStore';
 import {
     BluetoothEscposPrinter,
     BluetoothManager,
@@ -28,20 +29,45 @@ export async function connectPrinter(address: string) {
     }
 }
 
-export async function printReceipt(body: string) {
-    try {
-        await BluetoothEscposPrinter.printerAlign(BluetoothEscposPrinter.ALIGN.CENTER);
-        await BluetoothEscposPrinter.setBlob(0);
-        await BluetoothEscposPrinter.printText(body, {
-            encoding: 'GBK',
-            codepage: 0,
-            widthtimes: 2,
-            heigthtimes: 2,
-            fonttype: 1,
-        });
-        await BluetoothEscposPrinter.printText("Thank you!\n\r", {});
-        await BluetoothEscposPrinter.printText("\n\r", {});
-    } catch (e) {
-        console.log(e);
-    }
+export async function printBill(body: string) {
+  try {
+    await BluetoothEscposPrinter.printerAlign(
+      BluetoothEscposPrinter.ALIGN.CENTER
+    );
+    await BluetoothEscposPrinter.setBlob(0);
+    await BluetoothEscposPrinter.printText(body + "\n\r", {
+      encoding: "GBK",
+      codepage: 0,
+      widthtimes: 1,
+      heigthtimes: 1,
+      fonttype: 1,
+    });
+    await BluetoothEscposPrinter.printText("\n\r", {});
+  } catch (e) {
+    console.log("Print Error:", e);
+  }
+}
+
+export function generateBillText(payload: PaidBill): string {
+  const date = payload.date ?? new Date().toLocaleString();
+
+  return `
+  ${payload.customer_name}
+  -----------------------------
+  Games: ${payload.game_type.join(", ")}
+  Modes: ${payload.game_mode.join(", ")}
+  Tables: ${payload.table_names.join(", ")}
+
+  Total Bill: Rs. ${payload.total_bill}
+
+  ${
+    payload.total_frame ? `Total Frames: ${payload.total_frame}` : ""
+  }
+  ${
+    payload.time_played ? `Time Played: ${payload.time_played}` : ""
+  }
+
+  Date: ${date}
+  Thank you for visiting Breakers!
+  `.trim();
 }
