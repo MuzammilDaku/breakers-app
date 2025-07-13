@@ -93,7 +93,7 @@ export default function DashboardPaidBills() {
 }
 
 const styles = StyleSheet.create({
-   contentContainer: {
+  contentContainer: {
     // backgroundColor: "#fefefe",
     // padding: 20,
     paddingBottom: 10,

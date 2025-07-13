@@ -7,6 +7,7 @@ import {
   GetHistory,
   GetInUseTables,
 } from "@/services/table";
+import { requestBluetoothPermissions } from "@/services/utilities/getBluetoothPermissions";
 import { isInternetConnected } from "@/services/utilities/isInternetConnected";
 import { router } from "expo-router";
 import { useEffect, useRef } from "react";
@@ -16,8 +17,6 @@ export default function HomeScreen() {
   const syncQueue = useOfflineStore((state) => state.syncQueue);
   const syncing = useOfflineStore((state) => state.syncing);
   const loadData = useOfflineStore((state) => state.loadData);
-
-
 
   useEffect(() => {
     if (!user) {
@@ -31,7 +30,6 @@ export default function HomeScreen() {
     const pollAndSync = async () => {
       const isConnected = await isInternetConnected();
       if (isConnected && !syncing) {
-        // console.log("⏳ Syncing queued items...");
         await syncQueue();
       }
     };
@@ -69,18 +67,18 @@ export default function HomeScreen() {
   }
 
   useEffect(() => {
-    if(loadData === "load" || loadData === "load1") {
-        // console.log("Loading initial data...");
-        GetCustomer();
-        GetInUseTable();
-        GetPaidBills();
-        GetGamesHistory();
-      
+    if (loadData === "load" || loadData === "load1") {
+      GetCustomer();
+      GetInUseTable();
+      GetPaidBills();
+      GetGamesHistory();
     }
   }, [loadData]);
-  return (
-    <>
-      <TablesComp />
-    </>
-  );
+
+  useEffect(() => {
+    requestBluetoothPermissions();
+    console.log("Requesting Bluetooth permissions...");
+  }, []);
+
+  return <TablesComp />;
 }
