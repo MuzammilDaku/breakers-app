@@ -1,7 +1,7 @@
 import {
     BluetoothEscposPrinter,
     BluetoothManager,
-} from 'react-native-bluetooth-escpos-printer';
+} from '@ccdilan/react-native-bluetooth-escpos-printer';
 
 
 export async function scanDevices() {

@@ -1,4 +1,4 @@
-declare module 'react-native-bluetooth-escpos-printer' {
+declare module '@ccdilan/react-native-bluetooth-escpos-printer' {
   export interface Device {
     name: string;
     address: string;

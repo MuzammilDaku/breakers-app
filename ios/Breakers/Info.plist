@@ -23,9 +23,6 @@
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleURLTypes</key>
-    <key>NSBluetoothAlwaysUsageDescription</key>
-    <string>We need Bluetooth to connect to the printer</string>
-    
     <array>
       <dict>
         <key>CFBundleURLSchemes</key>
