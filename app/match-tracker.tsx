@@ -363,6 +363,7 @@ export default function MatchTracker() {
                   onFocus={() => {
                     setShowWinnerDropdown(true);
                   }}
+                  placeholderTextColor={'black'}
                   onBlur={() => setShowWinnerDropdown(false)}
                   onChangeText={(text) => {
                     setWinner(text);
@@ -396,6 +397,8 @@ export default function MatchTracker() {
                   }}
                   onBlur={() => setShowLoserDropdown(false)}
                   style={styles.input}
+                  placeholderTextColor={'black'}
+
                 />
                 {showLoserDropdown &&
                   renderDropdown(loserOptions, (p) => {

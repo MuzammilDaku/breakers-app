@@ -1,7 +1,7 @@
 import { PaidBill } from '@/context/appStore';
 import {
-    BluetoothEscposPrinter,
-    BluetoothManager,
+  BluetoothEscposPrinter,
+  BluetoothManager,
 } from '@ccdilan/react-native-bluetooth-escpos-printer';
 
 

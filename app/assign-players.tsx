@@ -9,13 +9,13 @@ import Checkbox from "expo-checkbox";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TextInput,
-    ToastAndroid,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from "react-native";
 export default function Assign() {
   const params = useLocalSearchParams();
@@ -161,6 +161,7 @@ export default function Assign() {
             style={styles.input}
             value={matchInfo.player_name1}
             onChangeText={(e) => handleChange("player_name1", e)}
+            placeholderTextColor={"black"}
           />
         </View>
         {matchInfo.game_mode == "1 v 1" && !isChecked && (
@@ -168,6 +169,8 @@ export default function Assign() {
             <Text style={styles.inputLabel}>Player 2 Name </Text>
             <TextInput
               placeholder="Enter Player Name"
+                  placeholderTextColor={'black'}
+
               style={styles.input}
               value={matchInfo.player_name2}
               onChangeText={(e) => handleChange("player_name2", e)}
@@ -179,6 +182,8 @@ export default function Assign() {
             <Text style={styles.inputLabel}>Player 2 Name </Text>
             <TextInput
               placeholder="Enter Player Name"
+                  placeholderTextColor={'black'}
+
               style={styles.input}
               value={matchInfo.player_name2}
               onChangeText={(e) => handleChange("player_name2", e)}
@@ -191,6 +196,8 @@ export default function Assign() {
               <Text style={styles.inputLabel}>Player 2 Name </Text>
               <TextInput
                 placeholder="Enter Player Name"
+                  placeholderTextColor={'black'}
+
                 style={styles.input}
                 value={matchInfo.player_name2}
                 onChangeText={(e) => handleChange("player_name2", e)}
@@ -200,6 +207,8 @@ export default function Assign() {
               <Text style={styles.inputLabel}>Player 3 Name </Text>
               <TextInput
                 placeholder="Enter Player Name"
+                  placeholderTextColor={'black'}
+
                 style={styles.input}
                 value={matchInfo.player_name3}
                 onChangeText={(e) => handleChange("player_name3", e)}
@@ -209,6 +218,8 @@ export default function Assign() {
               <Text style={styles.inputLabel}>Player 4 Name </Text>
               <TextInput
                 placeholder="Enter Player Name"
+                  placeholderTextColor={'black'}
+
                 style={styles.input}
                 value={matchInfo.player_name4}
                 onChangeText={(e) => handleChange("player_name4", e)}

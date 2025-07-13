@@ -1,7 +1,6 @@
 import { PaidBill, useAppStore } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
 import { baseUrl } from "@/services/base";
-import { generateBillText, printBill } from "@/services/printer";
 import { AddCheckIn, UpdateGameHistory } from "@/services/table";
 import { getCurrentPakistaniTime } from "@/services/utilities/getPakistaniTime";
 import { getRandomId } from "@/services/utilities/getRandomId";
@@ -121,7 +120,7 @@ export default function Billing() {
         }
         setPaidBills(payload);
         addPaidStatus(billIds);
-        await printBill(generateBillText(payload))
+        // await printBill(generateBillText(payload))
         router.navigate("/(tabs)");
         setIsLoading(false);
       }

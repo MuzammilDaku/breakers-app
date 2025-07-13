@@ -1,23 +1,27 @@
 import { useAppStore } from "@/context/appStore";
 import { useMemo, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
-import { Button, DataTable, Searchbar } from "react-native-paper";
+import { Button, DataTable, IconButton, Searchbar } from "react-native-paper";
 
 export default function DashboardPaidBills() {
   const PAGE_SIZE = 10;
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [sortAsc, setSortAsc] = useState(false); // false = newest first
   const billTables = useAppStore((state) => state?.paidBills);
 
-  // If you want to merge duplicate customer names, implement merging logic here.
-  // For now, just use the original billTables array.
   const mergedBillTables = billTables ?? [];
 
   const filteredBillTables = useMemo(() => {
-    return mergedBillTables.filter((item) =>
+    const filtered = mergedBillTables.filter((item) =>
       item.customer_name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery, mergedBillTables]);
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return sortAsc ? dateA - dateB : dateB - dateA;
+    });
+  }, [searchQuery, mergedBillTables, sortAsc]);
 
   const paginatedData = filteredBillTables.slice(0, page * PAGE_SIZE);
 
@@ -50,7 +54,17 @@ export default function DashboardPaidBills() {
             <DataTable style={{ backgroundColor: "#fff", borderRadius: 10 }}>
               <DataTable.Header>
                 <DataTable.Title>Customer Name</DataTable.Title>
-                <DataTable.Title>Time</DataTable.Title>
+                <DataTable.Title>
+                  Time
+                  <IconButton
+                    icon={sortAsc ? "arrow-up" : "arrow-down"}
+                    size={16}
+                    onPress={() => {
+                      setSortAsc((prev) => !prev);
+                      setPage(1);
+                    }}
+                  />
+                </DataTable.Title>
                 <DataTable.Title>Grand Total</DataTable.Title>
               </DataTable.Header>
             </DataTable>
@@ -94,8 +108,6 @@ export default function DashboardPaidBills() {
 
 const styles = StyleSheet.create({
   contentContainer: {
-    // backgroundColor: "#fefefe",
-    // padding: 20,
     paddingBottom: 10,
     flexGrow: 1,
   },

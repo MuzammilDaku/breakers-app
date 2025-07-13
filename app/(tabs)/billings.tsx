@@ -2,11 +2,11 @@ import { useAppStore } from "@/context/appStore";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Button, DataTable, Searchbar } from "react-native-paper";
 

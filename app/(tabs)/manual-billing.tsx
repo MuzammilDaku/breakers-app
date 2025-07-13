@@ -67,9 +67,9 @@ export default function ManualBilling() {
   useEffect(() => {
     if (
       billInfo.customer_name &&
-      billInfo.game_type.length > 0 &&
-      billInfo.game_mode.length > 0 &&
-      billInfo.table_names.length > 0 &&
+      // billInfo.game_type.length > 0 &&
+      // billInfo.game_mode.length > 0 &&
+      // billInfo.table_names.length > 0 &&
       billInfo.total_bill > 0
     ) {
       setIsDisabled(false);
