@@ -1,7 +1,7 @@
-import { PaidBill, useAppStore } from "@/context/appStore";
+import { PaidBill, useAppStore, UserBillTable } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
 import { baseUrl } from "@/services/base";
-import { AddCheckIn } from "@/services/table";
+import { AddGameHistory } from "@/services/table";
 import { getCurrentPakistaniTime } from "@/services/utilities/getPakistaniTime";
 import { getRandomId } from "@/services/utilities/getRandomId";
 import { isInternetConnected } from "@/services/utilities/isInternetConnected";
@@ -80,44 +80,32 @@ export default function ManualBilling() {
 
   const addToQueue = useOfflineStore((state) => state.addToQueue);
   const setPaidBills = useAppStore((state) => state.setPaidBills);
+  const setBillTables = useAppStore((state) => state.setBillTables);
 
   const handleClick = async () => {
     try {
       setIsLoading(true);
-      const payload = {
-        ...billInfo,
-        date: getCurrentPakistaniTime(),
-      };
       const isConnected = await isInternetConnected();
+      const payload :UserBillTable= {
+        _id: getRandomId(),
+        loser: billInfo.customer_name,
+        total_bill: billInfo.total_bill,
+        created_by:billInfo.created_by,
+        bill_type:"manual",
+        date:getCurrentPakistaniTime(),
+      };
       if (isConnected) {
-        const res = await AddCheckIn(payload);
-        console.log(res);
-        setIsLoading(false);
-        setBillInfo({
-          customer_name: "",
-          game_type: [],
-          game_mode: [],
-          table_names: [],
-          total_bill: 0,
-          created_by: user?._id,
-          date: getCurrentPakistaniTime(),
-          _id: getRandomId(),
-        });
-        setPaidBills(res);
-        ToastAndroid.showWithGravity(
-          "Bill Saved",
-          ToastAndroid.LONG,
-          ToastAndroid.CENTER
-        );
+        await AddGameHistory(payload);
       } else {
         addToQueue({
           method: "POST",
-          url: baseUrl + "/check-in",
+          url: baseUrl+"/table/game-history",
           id: getRandomId(),
           body: payload,
         });
-        setPaidBills(payload);
-        setIsLoading(false);
+    
+      }
+      setBillTables(payload);
         setBillInfo({
           customer_name: "",
           game_type: [],
@@ -128,14 +116,16 @@ export default function ManualBilling() {
           date: getCurrentPakistaniTime(),
           _id: getRandomId(),
         });
-        ToastAndroid.showWithGravity(
+          ToastAndroid.showWithGravity(
           "Bill Saved",
           ToastAndroid.LONG,
           ToastAndroid.CENTER
         );
-      }
+        setIsLoading(false);
+
+
     } catch (error) {
-      console.error("Error saving bill:", error);
+      // console.error("Error saving bill:", error);
       ToastAndroid.showWithGravity(
         String(error),
         ToastAndroid.LONG,
@@ -219,27 +209,25 @@ export default function ManualBilling() {
           <TextInput
             placeholder="Enter Amount"
             style={styles.input}
-            value={String(billInfo.total_bill)}
+            value={billInfo.total_bill === 0 ? "" : String(billInfo.total_bill)}
+            keyboardType="numeric"
             onChangeText={(e) => {
-              handleChange("total_bill", Number(e));
+              // Remove non-digit characters
+              const numericValue = e.replace(/[^0-9]/g, "");
+              handleChange("total_bill", Number(numericValue));
             }}
           />
         </View>
-        <View
-          style={[isDisabled || isLoading ? styles.btnDisabled : styles.btn]}
-        >
+        <View>
           <TouchableOpacity
+            style={[isDisabled || isLoading ? styles.btnDisabled : styles.btn]}
             onPress={handleClick}
             disabled={isDisabled || isLoading}
           >
             <Text
               style={{ textAlign: "center", color: "#fefefe", fontSize: 16 }}
             >
-              {isLoading ? (
-                <ActivityIndicator color={"#fefe"} />
-              ) : (
-                "Save & Print Bill"
-              )}
+              {isLoading ? <ActivityIndicator color={"#fefe"} /> : "Save Bill"}
             </Text>
           </TouchableOpacity>
         </View>

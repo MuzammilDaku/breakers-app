@@ -60,8 +60,8 @@ interface InUseTable {
 
 export interface UserBillTable {
   _id: string;
-  inUseTable: InUseTable;
-  winner: string;
+  inUseTable?: InUseTable;
+  winner?: string;
   loser: string;
   total_bill: number | undefined;
   total_frame?: number;
@@ -69,9 +69,10 @@ export interface UserBillTable {
   total_bill_per_frame?: number;
   total_bill_per_minute?: number;
   date?: string;
-  game_type: string;
+  game_type?: string;
   status?: string;
   created_by?: any
+  bill_type?:string;
 }
 
 interface Customer {
@@ -88,10 +89,10 @@ export interface PaidBill {
   customer_name: string;
   date: any;
   _id: string;
-  game_mode: string[]
+  game_mode?: string[]
   time_played?: number;
-  game_type: string[];
-  table_names: string[];
+  game_type?: string[];
+  table_names?: string[];
   bill_type?:string
 }
 

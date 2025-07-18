@@ -26,15 +26,16 @@ export default function Billing() {
   const customerBillTables = billTables?.filter(
     (item) => item.loser === customer
   );
-  const tablesName = customerBillTables?.map(
-    (item) => item?.inUseTable.table.name
-  );
-  const gameNames = customerBillTables?.map(
-    (item) => item?.inUseTable.game_type
-  );
-  const gameModes = customerBillTables?.map(
-    (item) => item?.inUseTable.game_mode
-  );
+  const tablesName = customerBillTables
+    ?.map((item) => item?.inUseTable?.table.name)
+    .filter((name): name is string => typeof name === "string");
+    // console.log(tables)
+  const gameNames = customerBillTables
+    ?.map((item) => item?.inUseTable?.game_type)
+    .filter((name): name is string => typeof name === "string");
+  const gameModes = customerBillTables
+    ?.map((item) => item?.inUseTable?.game_mode)
+    .filter((name): name is string => typeof name === "string");
   const billIds = customerBillTables?.map((item) => item._id);
 
   const totalBill = customerBillTables?.reduce(
@@ -65,12 +66,22 @@ export default function Billing() {
           customer_name: customer,
           created_by: user._id,
           total_bill: totalBill,
-          table_names: tablesName,
-          game_type: gameNames,
-          game_mode: gameModes,
           _id: getRandomId(),
           date: getCurrentPakistaniTime(),
         };
+
+        if (tablesName.length > 0) {
+          payload.table_names = tablesName.filter((name): name is string => typeof name === "string");
+        }
+        if (gameNames.length>0) {
+          payload.game_type = gameNames.filter((name): name is string => typeof name === "string");
+        }
+
+        if(gameModes.length>0) {
+          payload.game_mode = gameModes.filter((name): name is string => typeof name === "string");
+        }
+
+        // if()
 
         if (totalFrames) payload.total_frame = totalFrames;
         if (totoalTimePlayed) payload.time_played = totoalTimePlayed;
@@ -142,31 +153,36 @@ export default function Billing() {
           />
         </View>
         <View style={styles.container}>
+          {tablesName.length>0 &&
           <View style={styles.row}>
             <View>
               <Text style={styles.rowText}>Table Name</Text>
             </View>
             <View style={styles.btn}>
-              <Text style={styles.btnText}>{tablesName?.join(" , ")}</Text>
+              <Text style={styles.btnText}>{tablesName?.filter(Boolean).join(" , ")}</Text>
             </View>
           </View>
-          <View style={styles.row}>
+          }
+          
+          {gameNames.length > 0 && <View style={styles.row}>
             <View>
               <Text style={styles.rowText}>Game Name</Text>
             </View>
             <View style={styles.btn}>
-              <Text style={styles.btnText}>{gameNames?.join(" , ")}</Text>
+              <Text style={styles.btnText}>{gameNames?.filter(Boolean).join(" , ")}</Text>
             </View>
-          </View>
-          <View style={styles.row}>
+          </View> }
+          
+          {gameModes.length >0 && <View style={styles.row}>
             <View>
               <Text style={styles.rowText}>Game Mode</Text>
             </View>
             <View style={styles.btn}>
-              <Text style={styles.btnText}>{gameModes?.join(" , ")}</Text>
+              <Text style={styles.btnText}>{gameModes?.filter(Boolean).join(" , ")}</Text>
             </View>
-          </View>
-          <View style={styles.row}>
+          </View>}
+          
+          <View style={styles.rowLast}>
             <View>
               <Text style={styles.rowText}>Grand Total</Text>
             </View>
@@ -175,8 +191,8 @@ export default function Billing() {
             </View>
           </View>
         </View>
-        <View style={styles.btnGenerate}>
-          <TouchableOpacity onPress={handleClick}>
+        <View >
+          <TouchableOpacity onPress={handleClick} style={styles.btnGenerate}>
             <Text
               style={{ textAlign: "center", color: "#fefefe", fontSize: 16 }}
             >
@@ -233,6 +249,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderColor: "#E0E0E0",
+    paddingVertical: 10,
+  },
+    rowLast: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderBottomColor: "red",
+    paddingHorizontal: 8,
+    // borderBottomWidth: 1,
+    // borderColor: "#E0E0E0",
     paddingVertical: 10,
   },
   rowText: {

@@ -8,13 +8,10 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export default function TabLayout() {
   const router = useRouter();
-  const { user, setUser } = useAppStore();
+  const user = useAppStore((state) => state?.user);
+  const setUser = useAppStore((state) => state.setUser);
   useEffect(() => {
-    if (!user) {
-      router.navigate("/auth/login");
-    }
-
-    if (user?.date) {
+    if (user && user?.date) {
       const userDate = new Date(user.date);
       const today = new Date();
       // Zero out time for accurate day comparison
@@ -24,10 +21,13 @@ export default function TabLayout() {
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
       if (diffDays > 30) {
         setUser(null);
-        router.navigate("/auth/login");
+        router.replace("/auth/login");
       }
+    } else {
+        return router.replace("/auth/login");
+      
     }
-  }, []);
+  }, [user]);
   return (
     <Tabs>
       <Tabs.Screen

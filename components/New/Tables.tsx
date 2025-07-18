@@ -8,24 +8,22 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 export default function Tables(props: { selectedFilter: string }) {
   // const { tables, setTables, user, inUseTables } = useAppStore();
   const tables = useAppStore((state) => state.tables);
-  const filteredTables = () => {
-    if (props.selectedFilter === "all") {
-      return tables;
-    } else {
-      return tables.filter((table) => {
-        const status = gameModeCheck(table);
-        if (status == "Free" && props.selectedFilter === "free") {
-          return table;
-        }
-        if (
-          (status === "In Use" || status === "Friendly Match") &&
-          props.selectedFilter == "occupied"
-        ) {
-          return table;
-        }
-      });
-    }
-  };
+  const filteredTables =
+    props.selectedFilter === "all"
+      ? tables
+      : tables.filter((table) => {
+          const status = gameModeCheck(table);
+          if (status === "Free" && props.selectedFilter === "free") {
+            return true;
+          }
+          if (
+            (status === "In Use" || status === "Friendly Match") &&
+            props.selectedFilter === "occupied"
+          ) {
+            return true;
+          }
+          return false;
+        });
   const setTables = useAppStore((state) => state.setTables);
   const user = useAppStore((state) => state.user);
   const inUseTables = useAppStore((state) => state.inUseTables);
@@ -68,7 +66,8 @@ export default function Tables(props: { selectedFilter: string }) {
 
   return (
     <View style={styles.container}>
-      {filteredTables()?.map((item) => {
+      {filteredTables?.map((item, index) => {
+        // console.log(index,filteredTables.length)
         return (
           <TouchableOpacity
             key={item._id}
@@ -78,8 +77,11 @@ export default function Tables(props: { selectedFilter: string }) {
                 status === "Free" ? "/assign-players" : "/match-tracker";
               router.push({ pathname: route, params: { table_id: item._id } });
             }}
-            style={styles.row}
-          >
+            style={[
+              // styles.row,
+              index + 1 === filteredTables.length ? styles.rowLast:styles.row,
+            ]}
+            >
             <View>
               <Text style={styles.rowText}>{item.name}</Text>
             </View>
@@ -115,6 +117,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderColor: "#E0E0E0",
+    paddingVertical: 10,
+  },
+  rowLast: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderBottomColor: "red",
+    paddingHorizontal: 8,
+    // borderBottomWidth: 1
+    // borderColor: "#E0E0E0",
     paddingVertical: 10,
   },
   rowText: {

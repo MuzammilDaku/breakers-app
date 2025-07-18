@@ -1,30 +1,21 @@
 import TablesComp from "@/components/New/NewTablesComp";
 import { useAppStore } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
-import { connectPrinter, scanDevices } from "@/services/printer";
 import {
   GetCustomers,
   GetGameHistory,
   GetHistory,
   GetInUseTables,
 } from "@/services/table";
-import { requestBluetoothPermissions } from "@/services/utilities/getBluetoothPermissions";
 import { isInternetConnected } from "@/services/utilities/isInternetConnected";
-import { router } from "expo-router";
 import { useEffect, useRef } from "react";
-import { Alert } from "react-native";
 
 export default function HomeScreen() {
-  const { user } = useAppStore();
-  const syncQueue = useOfflineStore((state) => state.syncQueue);
-  const syncing = useOfflineStore((state) => state.syncing);
-  const loadData = useOfflineStore((state) => state.loadData);
+  const user = useAppStore((state) => state?.user);
+  const syncQueue = useOfflineStore((state) => state?.syncQueue);
+  const syncing = useOfflineStore((state) => state?.syncing);
+  const loadData = useOfflineStore((state) => state?.loadData);
 
-  useEffect(() => {
-    if (!user) {
-      router.navigate("/auth/login");
-    }
-  }, []);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -77,52 +68,50 @@ export default function HomeScreen() {
     }
   }, [loadData]);
 
-  async function ScanDevices() {
-    const devices = await scanDevices();
-    if (devices) {
-      const { paired, found } = devices;
-      const allDevices = [...paired, ...found];
+  // async function ScanDevices() {
+  //   const devices = await scanDevices();
+  //   if (devices) {
+  //     const { paired, found } = devices;
+  //     const allDevices = [...paired, ...found];
 
-      if (allDevices.length === 0) {
-        Alert.alert(
-          "No Devices Found",
-          "Make sure your printer is powered on and in range."
-        );
-        return;
-      }
-      Alert.alert(
-        "Select Printer",
-        "Tap to connect:",
-        allDevices.map((device) => ({
-          text: `${device.name || "Unknown"} (${device.address})`,
-          onPress: async () => {
-            try {
-              await connectPrinter(device.address);
-              Alert.alert(
-                "Connected",
-                `Printer: ${device.name || device.address}`
-              );
-            } catch (err: any) {
-              Alert.alert("Connection Failed", err.message || "Unknown error");
-            }
-          },
-        })),
-        { cancelable: true }
-      );
-    }
-    else Alert.alert("Bluetooth","No Printer Nearby Founded")
-  }
-useEffect(() => {
-  async function initBluetooth() {
-    await requestBluetoothPermissions();
-    console.log("Requesting Bluetooth permissions...");
-    await ScanDevices(); // only run scan after permission is granted
-  }
+  //     if (allDevices.length === 0) {
+  //       Alert.alert(
+  //         "No Devices Found",
+  //         "Make sure your printer is powered on and in range."
+  //       );
+  //       return;
+  //     }
+  //     Alert.alert(
+  //       "Select Printer",
+  //       "Tap to connect:",
+  //       allDevices.map((device) => ({
+  //         text: `${device.name || "Unknown"} (${device.address})`,
+  //         onPress: async () => {
+  //           try {
+  //             await connectPrinter(device.address);
+  //             Alert.alert(
+  //               "Connected",
+  //               `Printer: ${device.name || device.address}`
+  //             );
+  //           } catch (err: any) {
+  //             Alert.alert("Connection Failed", err.message || "Unknown error");
+  //           }
+  //         },
+  //       })),
+  //       { cancelable: true }
+  //     );
+  //   }
+  //   else Alert.alert("Bluetooth","No Printer Nearby Founded")
+  // }
+  // useEffect(() => {
+  //   async function initBluetooth() {
+  //     await requestBluetoothPermissions();
+  //     console.log("Requesting Bluetooth permissions...");
+  //     await ScanDevices(); // only run scan after permission is granted
+  //   }
 
-  initBluetooth();
-}, []);
-
-
+  //   initBluetooth();
+  // }, []);
 
   return <TablesComp />;
 }

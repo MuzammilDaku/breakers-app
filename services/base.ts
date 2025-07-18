@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const baseUrl = "https://breakersapi.netlify.app/api"; 
+export const baseUrl = "https://d22968f7467a.ngrok-free.app/api"; 
 
 const Api = axios.create({
     baseURL: baseUrl, 

@@ -169,8 +169,7 @@ export default function Assign() {
             <Text style={styles.inputLabel}>Player 2 Name </Text>
             <TextInput
               placeholder="Enter Player Name"
-                  placeholderTextColor={'black'}
-
+              placeholderTextColor={"black"}
               style={styles.input}
               value={matchInfo.player_name2}
               onChangeText={(e) => handleChange("player_name2", e)}
@@ -182,8 +181,7 @@ export default function Assign() {
             <Text style={styles.inputLabel}>Player 2 Name </Text>
             <TextInput
               placeholder="Enter Player Name"
-                  placeholderTextColor={'black'}
-
+              placeholderTextColor={"black"}
               style={styles.input}
               value={matchInfo.player_name2}
               onChangeText={(e) => handleChange("player_name2", e)}
@@ -196,8 +194,7 @@ export default function Assign() {
               <Text style={styles.inputLabel}>Player 2 Name </Text>
               <TextInput
                 placeholder="Enter Player Name"
-                  placeholderTextColor={'black'}
-
+                placeholderTextColor={"black"}
                 style={styles.input}
                 value={matchInfo.player_name2}
                 onChangeText={(e) => handleChange("player_name2", e)}
@@ -207,8 +204,7 @@ export default function Assign() {
               <Text style={styles.inputLabel}>Player 3 Name </Text>
               <TextInput
                 placeholder="Enter Player Name"
-                  placeholderTextColor={'black'}
-
+                placeholderTextColor={"black"}
                 style={styles.input}
                 value={matchInfo.player_name3}
                 onChangeText={(e) => handleChange("player_name3", e)}
@@ -218,8 +214,7 @@ export default function Assign() {
               <Text style={styles.inputLabel}>Player 4 Name </Text>
               <TextInput
                 placeholder="Enter Player Name"
-                  placeholderTextColor={'black'}
-
+                placeholderTextColor={"black"}
                 style={styles.input}
                 value={matchInfo.player_name4}
                 onChangeText={(e) => handleChange("player_name4", e)}
@@ -407,7 +402,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
   },
   pillSelected: {
-    backgroundColor: "#f4f5f9",
+    backgroundColor: "#B6D0E2",
   },
   btn: {
     marginVertical: 15,

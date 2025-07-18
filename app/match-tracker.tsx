@@ -207,11 +207,8 @@ export default function MatchTracker() {
       });
     }
     setBillTables(payload);
-    router.navigate({
-      pathname: "/billing",
-      params: {
-        customer_name: loser,
-      },
+    router.replace({
+      pathname: "/(tabs)"
     });
     deleteInUseTable(inUseTable);
     setTimerRunning(true);
@@ -424,8 +421,9 @@ export default function MatchTracker() {
                 </View>
               </View>
             )}
-            <View style={styles.btnSecondary}>
+            <View >
               <TouchableOpacity
+              style={styles.btnSecondary}
                 disabled={isDisabled}
                 onPress={() => setVisible(true)}
               >
@@ -439,11 +437,12 @@ export default function MatchTracker() {
               </TouchableOpacity>
             </View>
 
-            <View style={[isDisabled ? styles.btnDisabled : styles.btnPrimary]}>
-              <TouchableOpacity onPress={handleEndGame} disabled={isDisabled}>
+            <View >
+              <TouchableOpacity onPress={handleEndGame} disabled={isDisabled} 
+              style={[isDisabled ? styles.btnDisabled : styles.btnPrimary]}>
                 <Text style={styles.btnPrimaryText}>
                   {!isLoading ? (
-                    "End Game & Print Bill"
+                    "End Game"
                   ) : (
                     <ActivityIndicator color={"#fefe"} />
                   )}
@@ -471,6 +470,7 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: "700",
+    color:"black"
   },
   input: {
     height: 40,
@@ -498,6 +498,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
+    color:"black"
   },
   dropdownItemDisabled: {
     padding: 10,
