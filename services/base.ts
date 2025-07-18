@@ -1,6 +1,11 @@
 import axios from "axios";
 
-export const baseUrl = "https://d22968f7467a.ngrok-free.app/api"; 
+// Vercel Deployed API LINK
+export const baseUrl = "https://breakers-api.vercel.app/api"; 
+
+// Netlify Deployed API LINK
+// export const baseUrl = "https://breakersapi.netlify.app/api"; 
+
 
 const Api = axios.create({
     baseURL: baseUrl, 

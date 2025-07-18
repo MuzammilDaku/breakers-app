@@ -20,7 +20,7 @@
     "@react-navigation/native": "^7.1.6",
     "axios": "^1.10.0",
     "dayjs": "^1.11.13",
-    "expo": "53.0.18",
+    "expo": "53.0.19",
     "expo-blur": "~14.1.5",
     "expo-checkbox": "~4.1.4",
     "expo-constants": "~17.1.7",
@@ -38,7 +38,6 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.5",
-    "react-native-element-dropdown": "^2.12.4",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-paper": "^5.14.5",
     "react-native-reanimated": "~3.17.4",
@@ -58,6 +57,13 @@
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "typescript": "~5.8.3"
+  },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false
+      }
+    }
   },
   "private": true
 }
