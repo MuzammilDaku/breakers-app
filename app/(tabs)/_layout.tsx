@@ -3,8 +3,10 @@ import React, { useEffect } from "react";
 
 import { useAppStore } from "@/context/appStore";
 import { FontAwesome6 } from "@expo/vector-icons";
+import Feather from '@expo/vector-icons/Feather';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+
 
 export default function TabLayout() {
   const router = useRouter();
@@ -67,6 +69,20 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
               name="view-dashboard-outline"
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+        <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Settings",
+          tabBarIcon: ({ color }) => (
+            <Feather
+              name="settings"
               size={24}
               color={color}
             />

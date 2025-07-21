@@ -152,14 +152,26 @@ export default function MatchTracker() {
     .padStart(2, "0");
   const seconds = (elapsedTime % 60).toString().padStart(2, "0");
 
+   const [isFriendlyMatch, setIsFriendlyMatch] = useState(
+    inUseTable?.friendly_match ?? false
+  );
+
   useEffect(() => {
-    if (!winner || !loser) {
+    // console.log("jhjh")
+    if (!isFriendlyMatch && (!winner || !loser)) {
       setIsDisabled(true);
-    } else setIsDisabled(false);
+    }
+    else if(isFriendlyMatch) {
+      if(!loser) {
+        setIsDisabled(true)
+      }
+      else setIsDisabled(false)
+    } 
+    else setIsDisabled(false);
   }, [winner, loser]);
 
   const [isLoadingOneMoreGame, setIsLoadingOneMoreGame] = useState(false);
-  // const
+ 
 
   const handleEndGame = async () => {
     setIsLoading(true);
@@ -208,7 +220,7 @@ export default function MatchTracker() {
     }
     setBillTables(payload);
     router.replace({
-      pathname: "/(tabs)"
+      pathname: "/(tabs)",
     });
     deleteInUseTable(inUseTable);
     setTimerRunning(true);
@@ -350,38 +362,41 @@ export default function MatchTracker() {
 
           <View style={{ marginHorizontal: 25 }}>
             <View style={{ flexDirection: "row", width: "100%" }}>
-              {/* Winner Field */}
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Winner *</Text>
-                <TextInput
-                  mode="outlined"
-                  placeholder="Enter Player Name"
-                  value={winner}
-                  onFocus={() => {
-                    setShowWinnerDropdown(true);
-                  }}
-                  placeholderTextColor={'black'}
-                  onBlur={() => setShowWinnerDropdown(false)}
-                  onChangeText={(text) => {
-                    setWinner(text);
-                    setWinnerSearch(text);
-                    setShowWinnerDropdown(true);
-                  }}
-                  style={styles.input}
-                />
-                {showWinnerDropdown &&
-                  // winnerSearch.length > 0 &&
-                  renderDropdown(winnerOptions, (p) => {
-                    setWinner(p);
-                    setWinnerSearch(p);
-                    setShowWinnerDropdown(false);
-                    Keyboard.dismiss();
-                  })}
-              </View>
+              {!isFriendlyMatch && (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Winner *</Text>
+                  <TextInput
+                    mode="outlined"
+                    placeholder="Enter Player Name"
+                    value={winner}
+                    onFocus={() => {
+                      setShowWinnerDropdown(true);
+                    }}
+                    placeholderTextColor={"black"}
+                    onBlur={() => setShowWinnerDropdown(false)}
+                    onChangeText={(text) => {
+                      setWinner(text);
+                      setWinnerSearch(text);
+                      setShowWinnerDropdown(true);
+                    }}
+                    style={styles.input}
+                  />
+                  {showWinnerDropdown &&
+                    // winnerSearch.length > 0 &&
+                    renderDropdown(winnerOptions, (p) => {
+                      setWinner(p);
+                      setWinnerSearch(p);
+                      setShowWinnerDropdown(false);
+                      Keyboard.dismiss();
+                    })}
+                </View>
+              )}
 
               {/* Loser Field */}
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Loser *</Text>
+                <Text style={styles.inputLabel}>
+                  {isFriendlyMatch ? "Customer Name *" : "Loser *"}
+                </Text>
                 <TextInput
                   mode="outlined"
                   placeholder="Enter Player Name"
@@ -394,8 +409,7 @@ export default function MatchTracker() {
                   }}
                   onBlur={() => setShowLoserDropdown(false)}
                   style={styles.input}
-                  placeholderTextColor={'black'}
-
+                  placeholderTextColor={"black"}
                 />
                 {showLoserDropdown &&
                   renderDropdown(loserOptions, (p) => {
@@ -421,9 +435,9 @@ export default function MatchTracker() {
                 </View>
               </View>
             )}
-            <View >
+            <View>
               <TouchableOpacity
-              style={styles.btnSecondary}
+                style={styles.btnSecondary}
                 disabled={isDisabled}
                 onPress={() => setVisible(true)}
               >
@@ -437,9 +451,12 @@ export default function MatchTracker() {
               </TouchableOpacity>
             </View>
 
-            <View >
-              <TouchableOpacity onPress={handleEndGame} disabled={isDisabled} 
-              style={[isDisabled ? styles.btnDisabled : styles.btnPrimary]}>
+            <View>
+              <TouchableOpacity
+                onPress={handleEndGame}
+                disabled={isDisabled}
+                style={[isDisabled ? styles.btnDisabled : styles.btnPrimary]}
+              >
                 <Text style={styles.btnPrimaryText}>
                   {!isLoading ? (
                     "End Game"
@@ -470,7 +487,7 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: "700",
-    color:"black"
+    color: "black",
   },
   input: {
     height: 40,
@@ -498,7 +515,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
-    color:"black"
+    color: "black",
   },
   dropdownItemDisabled: {
     padding: 10,

@@ -30,6 +30,10 @@ export async function scanDevices() {
   }
 }
 
+export async function isBluetoothEnabled () {
+  return await BluetoothManager.isBluetoothEnabled()
+}
+
 
 
 export async function connectPrinter(address: string) {

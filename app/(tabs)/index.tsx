@@ -1,7 +1,6 @@
 import TablesComp from "@/components/New/NewTablesComp";
 import { useAppStore } from "@/context/appStore";
 import { useOfflineStore } from "@/context/offlineStore";
-import { connectPrinter, scanDevices, StartBluetooth } from "@/services/printer";
 import {
   GetCustomers,
   GetGameHistory,
@@ -11,7 +10,6 @@ import {
 import { requestBluetoothPermissions } from "@/services/utilities/getBluetoothPermissions";
 import { isInternetConnected } from "@/services/utilities/isInternetConnected";
 import { useEffect, useRef } from "react";
-import { Alert } from "react-native";
 
 export default function HomeScreen() {
   const user = useAppStore((state) => state?.user);
@@ -71,48 +69,10 @@ export default function HomeScreen() {
     }
   }, [loadData]);
 
-  async function ScanDevices() {
-    const devices = await scanDevices();
-    console.log("devices",devices)
-    if (devices) {
-      const { paired, found } = devices;
-      const allDevices = [...paired, ...found];
 
-      if (allDevices.length === 0) {
-        Alert.alert(
-          "No Devices Found",
-          "Make sure your printer is powered on and in range."
-        );
-        return;
-      }
-      Alert.alert(
-        "Select Printer",
-        "Tap to connect:",
-        allDevices.map((device) => ({
-          text: `${device.name || "Unknown"} (${device.address})`,
-          onPress: async () => {
-            try {
-              await connectPrinter(device.address);
-              Alert.alert(
-                "Connected",
-                `Printer: ${device.name || device.address}`
-              );
-            } catch (err: any) {
-              Alert.alert("Connection Failed", err.message || "Unknown error");
-            }
-          },
-        })),
-        { cancelable: true }
-      );
-    }
-    else Alert.alert("Bluetooth",JSON.stringify(devices))
-  }
   useEffect(() => {
     async function initBluetooth() {
       await requestBluetoothPermissions();
-      await StartBluetooth()
-      console.log("Requesting Bluetooth permissions...");
-      await ScanDevices(); // only run scan after permission is granted
     }
 
     initBluetooth();
