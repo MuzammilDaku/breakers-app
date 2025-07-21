@@ -7,7 +7,26 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Tables(props: { selectedFilter: string }) {
   // const { tables, setTables, user, inUseTables } = useAppStore();
+
   const tables = useAppStore((state) => state.tables);
+  const inUseTables = useAppStore((state) => state.inUseTables);
+
+  const gameModeCheck = (table: Table) => {
+    const data =
+      inUseTables.length > 0
+        ? inUseTables?.filter(
+            (inUseTable) => String(inUseTable?.table._id) === String(table?._id)
+          )
+        : [];
+
+    if (data?.length > 0) {
+      const isFriendly = data?.some((inUseTable) => inUseTable?.friendly_match);
+      return isFriendly ? "Friendly Match" : "In Use";
+    }
+
+    return "Free";
+  };
+
   const filteredTables =
     props.selectedFilter === "all"
       ? tables
@@ -26,7 +45,6 @@ export default function Tables(props: { selectedFilter: string }) {
         });
   const setTables = useAppStore((state) => state.setTables);
   const user = useAppStore((state) => state.user);
-  const inUseTables = useAppStore((state) => state.inUseTables);
 
   const queue = useOfflineStore((state) => state.queue);
   const hasLoaded = useOfflineStore((state) => state.hasLoaded);
@@ -48,22 +66,6 @@ export default function Tables(props: { selectedFilter: string }) {
     }
   }, [hasLoaded, user]);
 
-  const gameModeCheck = (table: Table) => {
-    const data =
-      inUseTables.length > 0
-        ? inUseTables?.filter(
-            (inUseTable) => String(inUseTable?.table._id) === String(table?._id)
-          )
-        : [];
-
-    if (data?.length > 0) {
-      const isFriendly = data?.some((inUseTable) => inUseTable?.friendly_match);
-      return isFriendly ? "Friendly Match" : "In Use";
-    }
-
-    return "Free";
-  };
-
   return (
     <View style={styles.container}>
       {filteredTables?.map((item, index) => {
@@ -79,9 +81,9 @@ export default function Tables(props: { selectedFilter: string }) {
             }}
             style={[
               // styles.row,
-              index + 1 === filteredTables.length ? styles.rowLast:styles.row,
+              index + 1 === filteredTables.length ? styles.rowLast : styles.row,
             ]}
-            >
+          >
             <View>
               <Text style={styles.rowText}>{item.name}</Text>
             </View>

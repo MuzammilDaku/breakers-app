@@ -1,23 +1,35 @@
-import { PaidBill } from '@/context/appStore';
 import {
   BluetoothEscposPrinter,
   BluetoothManager,
 } from '@ccdilan/react-native-bluetooth-escpos-printer';
 
 
-export async function scanDevices() {
-    //   await requestBluetoothPermission();
-    try {
-        const devices = await BluetoothManager.scanDevices();
-        const paired = JSON.parse(devices.paired);   // already paired devices
-        const found = JSON.parse(devices.found);     // found nearby devices
-        console.log('Paired:', paired);
-        console.log('Found:', found);
-        return { paired, found };
-    } catch (e) {
-        console.log(e);
-    }
+
+export async function StartBluetooth() {
+  try {
+    await BluetoothManager.enableBluetooth()
+  } catch (error) {
+    
+  }
 }
+
+
+export async function scanDevices() {
+  try {
+    // await BluetoothManager.start();
+
+    const devices = await BluetoothManager.scanDevices();
+
+    const paired = devices.paired ? JSON.parse(devices.paired) : [];
+    const found = devices.found ? JSON.parse(devices.found) : [];
+
+    return { paired, found };
+  } catch (e) {
+    console.log("Scan Error", e);
+    return { paired: [], found: [] }; // fallback
+  }
+}
+
 
 
 export async function connectPrinter(address: string) {
@@ -48,7 +60,7 @@ export async function printBill(body: string) {
   }
 }
 
-export function generateBillText(payload: PaidBill): string {
+export function generateBillText(payload: any): string {
   const date = payload.date ?? new Date().toLocaleString();
 
   return `
