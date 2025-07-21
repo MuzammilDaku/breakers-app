@@ -1,8 +1,10 @@
+import { useAppStore } from "@/context/appStore";
 import {
     connectPrinter,
     scanDevices,
     StartBluetooth,
 } from "@/services/printer";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
     ActivityIndicator,
@@ -14,6 +16,7 @@ import {
 } from "react-native";
 
 export default function SettingsPage() {
+  const setUser = useAppStore((state) => state.setUser);
   const [printerEnabled, setPrinterEnabled] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -58,6 +61,11 @@ export default function SettingsPage() {
     await ScanDevices();
     setIsLoading(false);
   };
+
+  const handleLogout = async () => {
+    setUser(null);
+    router.replace("/auth/login")
+  };
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -80,7 +88,7 @@ export default function SettingsPage() {
         </Text>
       </TouchableOpacity>
       <View style={styles.spacer} />
-      <TouchableOpacity style={styles.logoutButton}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
     </View>
