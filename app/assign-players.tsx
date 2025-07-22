@@ -145,7 +145,7 @@ export default function Assign() {
         ToastAndroid.SHORT,
         ToastAndroid.TOP
       );
-      return router.navigate("/(tabs)");
+      return router.replace("/(tabs)");
     } catch (error) {
       console.log("error", error);
     }

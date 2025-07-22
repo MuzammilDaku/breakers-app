@@ -305,7 +305,7 @@ export default function MatchTracker() {
     setTimerRunning(true);
     setLoser("");
     setWinner("");
-    router.navigate({
+    router.replace({
       pathname: "/match-tracker",
       params: { table_id: table._id },
     });

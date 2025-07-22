@@ -132,7 +132,7 @@ export default function Billing() {
         setPaidBills(payload);
         addPaidStatus(billIds);
         // await printBill(generateBillText(payload))
-        router.navigate("/(tabs)");
+        router.replace("/(tabs)");
         setIsLoading(false);
       }
     } catch (error) {
